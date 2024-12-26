@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { sdkConfig } from '../appConfig';
 
 const verifyIdFrontApi = async (accessToken: string, apiKey: string, tenancyName: string, transactionId: string, imageBase64: string) => {
-  const url = 'https://api.vlenseg.com/api/DigitalIdentity/verify/id/front';
+  const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/front';
 
   const requestBody = {
     transaction_id: transactionId,

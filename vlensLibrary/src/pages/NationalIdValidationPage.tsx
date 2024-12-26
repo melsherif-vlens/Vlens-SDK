@@ -7,7 +7,7 @@ import verifyIdFrontApi from '../apis/front';
 import verifyIdBackApi from '../apis/back';
 import compressBase64Image from '../utilities/compressBase64Image';
 
-import type { VLensSdkProps } from '../types';
+import type { VLensSdkProps } from '../types/VLensSdkProps';
 
 const NationalIdValidationPage = (props: VLensSdkProps) => {
 

@@ -10,7 +10,7 @@ import { Worklets } from 'react-native-worklets-core'
 import verifyFaceApi from '../apis/face';
 import compressBase64Image from '../utilities/compressBase64Image';
 
-import type { VLensSdkProps } from '../types';
+import type { VLensSdkProps } from '../types/VLensSdkProps';
 
 const FaceValidationPage = (props: VLensSdkProps) => {
 

@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import type { VLensSdkProps } from './types';
+import type { VLensSdkProps } from './types/VLensSdkProps';
 import NationalIdValidationPage from './pages/NationalIdValidationPage';
 import FaceValidationPage from './pages/FaceValidationPage';
 
 const VLensView = (props: VLensSdkProps) => {
 
   const [step, setStep] = useState<'nationalId' | 'face'>('nationalId');
+  const numberOfLivenessRetries = useRef(0);
 
   // Check props
   useEffect(() => {
@@ -20,9 +21,16 @@ const VLensView = (props: VLensSdkProps) => {
   // Callbacks
   const onSccess = () => {
     console.log('VLensView Success:', step);
+    
     if (step === 'nationalId') {
       setStep('face');
       return
+    }
+
+    if (step === 'face' && numberOfLivenessRetries.current < 2) {
+      numberOfLivenessRetries.current += 1;
+      setStep('face');
+      return;
     }
 
     props.onSuccess();

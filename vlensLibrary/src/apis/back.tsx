@@ -1,4 +1,6 @@
 import axios, { AxiosError } from 'axios';
+import { sdkConfig } from '../appConfig';
+import { getApiError } from './ApiError';
 
 interface ApiErrorResponse {
     error_code: number;
@@ -6,7 +8,7 @@ interface ApiErrorResponse {
     data: any | null;
 }
 const verifyIdBackApi = async (accessToken: string, apiKey: string, tenancyName: string, transactionId: string, imageBase64: string) => {
-    const url = 'https://api.vlenseg.com/api/DigitalIdentity/verify/id/back';
+    const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/back';
 
     const requestBody = {
         transaction_id: transactionId,
@@ -43,9 +45,10 @@ const verifyIdBackApi = async (accessToken: string, apiKey: string, tenancyName:
 
             // Handle API response errors
             if (axiosError.response) {
-                const { error_code, error_message } = axiosError.response.data || {};
+                const { error_code } = axiosError.response.data || {};
 
                 console.log('API Error Code:', error_code);
+                const error_message = getApiError(error_code);
                 console.log('API Error Message:', error_message);
 
                 // Throw a structured error object

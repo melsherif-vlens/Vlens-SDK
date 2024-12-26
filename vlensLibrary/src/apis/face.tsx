@@ -1,4 +1,6 @@
 import axios, { AxiosError } from 'axios';
+import { sdkConfig } from '../appConfig';
+import { getApiError } from './ApiError';
 
 interface ApiErrorResponse {
     error_code: number;
@@ -6,7 +8,7 @@ interface ApiErrorResponse {
     data: any | null;
 }
 const verifyFaceApi = async (accessToken: string, apiKey: string, tenancyName: string, transactionId: string, face1: string, face2: string, face3: string) => {
-    const url = 'https://api.vlenseg.com/api/DigitalIdentity/verify/liveness/multi';
+    const url = sdkConfig.env.apiBaseUrl + 'api/DigitalIdentity/verify/liveness/multi';
 
     const requestBody = {
         transaction_id: transactionId,
@@ -50,8 +52,9 @@ const verifyFaceApi = async (accessToken: string, apiKey: string, tenancyName: s
 
             // Handle API response errors
             if (axiosError.response) {
-                const { error_code, error_message } = axiosError.response.data || {};
+                const { error_code } = axiosError.response.data || {};
 
+                const error_message = getApiError(error_code);
                 console.error('API Error Code:', error_code);
                 console.error('API Error Message:', error_message);
 

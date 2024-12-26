@@ -17,7 +17,8 @@
       "bundleIdentifier": "vlens.example",
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera."
-      }
+      },
+      "appleTeamId": "QR94Q3DZA2"
     },
     "android": {
       "permissions": [
