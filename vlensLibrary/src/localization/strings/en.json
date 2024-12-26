@@ -1,0 +1,15 @@
+{
+    "camera_permission_msg": "Camera permission is required to use this feature.",
+    "align_id_front_side_msg": "Align the front side of the ID within the frame",
+    "align_id_back_side_msg": "Align the back side of the ID within the frame",
+    "uploading_msg": "Uploading...",
+    "success" : "Success",
+    "error" : "Error",
+    "faild_to_capture_image": "Failed to capture image.",
+    "back_image_captured": "Back image captured.",
+    "front_image_captured": "Front image captured.",
+    "internet_connection_error": "Internet connection error.",
+    "no_camera_device_found": "No camera device found.",
+    "div_failed": "Digital Identity verification failed.",
+    "div_success": "Digital Identity verification success."
+}

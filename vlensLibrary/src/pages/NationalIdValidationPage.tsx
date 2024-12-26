@@ -7,6 +7,7 @@ import verifyIdFrontApi from '../apis/front';
 import verifyIdBackApi from '../apis/back';
 import compressBase64Image from '../utilities/compressBase64Image';
 
+import { useI18n } from '../localization/useI18n';
 import type { VLensSdkProps } from '../types/VLensSdkProps';
 
 const NationalIdValidationPage = (props: VLensSdkProps) => {
@@ -18,6 +19,8 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
     const [step, setStep] = useState<'front' | 'back'>('front');
 
     const [isLoading, setIsLoading] = useState(false);
+
+    const { t } = useI18n();
 
     // Request Camera Permission
     useEffect(() => {
@@ -60,13 +63,13 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
         } catch (error) {
             if (error instanceof Error) {
                 console.log('Error Message:', error.message);
-                Alert.alert('Error', error.message);
+                Alert.alert(t('Error'), error.message);
                 onFaild(error.message);
 
             } else {
                 console.log('Unexpected Error:', error);
                 console.log('Error during ID back verification:', error);
-                Alert.alert('Error', 'Internet connection error.');
+                Alert.alert(t('Error'), t('internet_connection_error'));
                 onFaild('Internet connection error.');
             }
             
@@ -83,16 +86,16 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
             const base64 = await RNFS.readFile(photo.path, 'base64');
 
             if (step === 'front') {
-                Alert.alert('Success', 'Front image captured.');
+                Alert.alert(t('success'), t('front_image_captured'));
                 setStep('back');
                 postFrontImage(base64);
             } else if (step === 'back') {
-                Alert.alert('Success', 'Back image captured.');
+                Alert.alert(t('success'), t('back_image_captured'));
                 postBackImage(base64);
             }
         } catch (error) {
             console.log('Capture Error:', error);
-            Alert.alert('Error', 'Failed to capture image.');
+            Alert.alert(t('Error'), t('faild_to_capture_image'));
         }
     };
 
@@ -100,7 +103,7 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
     if (!cameraPermission) {
         return (
             <View style={styles.center}>
-                <Text>Camera permission is required to use this feature.</Text>
+                <Text>{t('camera_permission_msg')}</Text>
             </View>
         );
     }
@@ -108,7 +111,7 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
     if (!device) {
         return (
             <View style={styles.center}>
-                <Text>No camera device found.</Text>
+                <Text>{ t('no_camera_device_found') }</Text>
             </View>
         );
     }
@@ -134,9 +137,7 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
             {/* Capture Button */}
             <View style={styles.controls}>
                 <Text style={styles.cardInstruction}>
-                    {step === 'front'
-                        ? 'Align the front side of the ID within the frame'
-                        : 'Align the back side of the ID within the frame'}
+                    { step === 'front' ? t('align_id_front_side_msg') : t('align_id_back_side_msg') }
                 </Text>
                 <TouchableOpacity style={styles.captureButton} onPress={captureImage} disabled={isLoading}>
                     <View style={styles.captureCircle} />
@@ -147,7 +148,7 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
             {isLoading && (
                 <View style={styles.loadingOverlay}>
                     <ActivityIndicator size="large" color="#ffffff" />
-                    <Text style={styles.loadingText}>Uploading...</Text>
+                    <Text style={styles.loadingText}>{ t('uploading_msg') }</Text>
                 </View>
             )}
         </View>

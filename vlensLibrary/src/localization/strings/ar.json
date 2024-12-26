@@ -1,0 +1,15 @@
+{
+    "camera_permission_msg": "يتطلب إذن الكاميرا لاستخدام هذه الميزة.",
+    "align_id_front_side_msg": "قم بمحاذاة الجانب الأمامي من الهوية داخل الإطار",
+    "align_id_back_side_msg": "قم بمحاذاة الجانب الخلفي من الهوية داخل الإطار",
+    "uploading_msg": "جارٍ التحميل...",
+    "success" : "نجاح",
+    "error" : "خطأ",
+    "faild_to_capture_image": "فشل في التقاط الصورة.",
+    "back_image_captured": "تم التقاط صورة الخلفية.",
+    "front_image_captured": "تم التقاط صورة الأمامية.",
+    "internet_connection_error": "خطأ في اتصال الإنترنت.",
+    "no_camera_device_found": "لم يتم العثور على جهاز كاميرا.",
+    "div_failed": "فشل التحقق من الهوية الرقمية. يرجى المحاولة مرة أخرى.",
+    "div_success": "تم التحقق من الهوية الرقمية بنجاح."
+}

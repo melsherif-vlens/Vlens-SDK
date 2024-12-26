@@ -4,6 +4,7 @@ export interface VLensSdkProps {
     apiKey: string;
     transactionId: string;
     isLivenessOnly: boolean;
+    locale: string;
     onSuccess: () => void;
     onFaild: (error: string) => void;
 }

@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import type { VLensSdkProps } from './types/VLensSdkProps';
+import { sdkConfig } from './appConfig';
+
 import NationalIdValidationPage from './pages/NationalIdValidationPage';
 import FaceValidationPage from './pages/FaceValidationPage';
 
@@ -13,6 +15,9 @@ const VLensView = (props: VLensSdkProps) => {
   // Check props
   useEffect(() => {
     console.log('VLensView Props:', props);
+
+    sdkConfig.i18n.defaultLocale = props.locale;
+
     if (props.isLivenessOnly) {
       setStep('face');
     }

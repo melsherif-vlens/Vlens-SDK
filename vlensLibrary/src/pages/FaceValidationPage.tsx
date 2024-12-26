@@ -11,6 +11,7 @@ import verifyFaceApi from '../apis/face';
 import compressBase64Image from '../utilities/compressBase64Image';
 
 import type { VLensSdkProps } from '../types/VLensSdkProps';
+import { useI18n } from '../localization/useI18n';
 
 const FaceValidationPage = (props: VLensSdkProps) => {
 
@@ -42,14 +43,38 @@ const FaceValidationPage = (props: VLensSdkProps) => {
     const [isLoading, setIsLoading] = useState(false);
     var isProcessing = false;
 
-    const faceOptions = ['Smile', 'Blinking', 'Turned Right', 'Turned Left', 'Looking Straight'];
+    const { t } = useI18n();
+
+    // const faceOptions = ['Smile', 'Blinking', 'Turned Right', 'Turned Left', 'Looking Straight'];
+
+    const getRandomFaces = (): string[] => {
+
+        let flow1 = ['Blinking', 'Turned Right', 'Smile'];
+        let flow2 = ['Blinking', 'Turned Left', 'Smile'];
+        let flow3 = ['Smile', 'Turned Right', 'Blinking'];
+        let flow4 = ['Smile', 'Turned Left', 'Blinking'];
+        let flow5 = ['Blinking', 'Turned Right', 'Looking Straight'];
+        let flow6 = ['Blinking', 'Turned Left', 'Looking Straight'];
+        let flow7 = ['Smile', 'Turned Right', 'Looking Straight'];
+        let flow8 = ['Smile', 'Turned Left', 'Looking Straight'];
+        let flow9 = ['Blinking', 'Smile', 'Looking Straight'];
+        let flow10 = ['Smile', 'Blinking', 'Looking Straight'];
+
+        let flows = [flow1, flow2, flow3, flow4, flow5, flow6, flow7, flow8, flow9, flow10];
+
+        let randomFlowIndex = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+
+        return flows[randomFlowIndex] ?? flow1;
+    };
+
     const selectRandomFaces = () => {
-        let randomFaces = faceOptions.sort(() => Math.random() - 0.5).slice(0, 3);
+        let randomFaces = getRandomFaces()//faceOptions.sort(() => Math.random() - 0.5).slice(0, 3);
         
         face1.current = randomFaces[0] ?? '';
         face2.current = randomFaces[1] ?? '';
         face3.current = randomFaces[2] ?? '';
     };
+    
     useEffect(() => {
         console.log('selectRandomFaces');
         selectRandomFaces();
@@ -105,7 +130,7 @@ const FaceValidationPage = (props: VLensSdkProps) => {
                 //         },
                 //     },
                 // ]);
-                props?.onFaild('Digital Identity verification failed.');
+                props?.onFaild(t('div_failed'));
             }
 
 
@@ -126,7 +151,7 @@ const FaceValidationPage = (props: VLensSdkProps) => {
                 //     },
                 // ]);
 
-                props?.onFaild('Digital Identity verification failed.');
+                props?.onFaild(t('div_failed'));
             }
             setIsLoading(false);
         }
@@ -319,7 +344,7 @@ const FaceValidationPage = (props: VLensSdkProps) => {
     if (!cameraPermission) {
         return (
             <View style={styles.center}>
-                <Text>Camera permission is required to use this feature.</Text>
+                <Text>{ t('camera_permission_msg') }</Text>
             </View>
         );
     }
@@ -327,7 +352,7 @@ const FaceValidationPage = (props: VLensSdkProps) => {
     if (!device) {
         return (
             <View style={styles.center}>
-                <Text>No camera device found.</Text>
+                <Text>{ t('no_camera_device_found') }</Text>
             </View>
         );
     }
@@ -356,9 +381,9 @@ const FaceValidationPage = (props: VLensSdkProps) => {
             {/* Instructions */}
             <View style={styles.controls}>
                 <Text style={styles.cardInstruction}>
-                    {stepNumber === 0 ? face1.current : ''}
-                    {stepNumber === 1 ? face2.current : ''}
-                    {stepNumber === 2 ? face3.current : ''}
+                    {stepNumber === 0 ? t(face1.current) : ''}
+                    {stepNumber === 1 ? t(face2.current) : ''}
+                    {stepNumber === 2 ? t(face3.current) : ''}
                 </Text>
             </View>
         </View>

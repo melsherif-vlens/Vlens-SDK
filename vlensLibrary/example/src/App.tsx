@@ -74,6 +74,7 @@ export default function App() {
         transactionId={transactionId}
         accessToken={accessToken}
         isLivenessOnly={isLivenessOnly.current}
+        locale="ar"
         onSuccess={onVLensSuccess}
         onFaild={onVLensFaild}
       />
