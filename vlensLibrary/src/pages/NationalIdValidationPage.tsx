@@ -85,11 +85,11 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
             const base64 = await RNFS.readFile(photo.path, 'base64');
 
             if (step === 'front') {
-                Alert.alert(t('success'), t('front_image_captured'));
+                // Alert.alert(t('success'), t('front_image_captured'));
                 setStep('back');
                 postFrontImage(base64);
             } else if (step === 'back') {
-                Alert.alert(t('success'), t('back_image_captured'));
+                // Alert.alert(t('success'), t('back_image_captured'));
                 postBackImage(base64);
             }
         } catch (error) {

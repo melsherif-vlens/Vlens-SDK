@@ -12,7 +12,7 @@ npm install react-native-vlens
 
 ## Additional Installation
 ```bash
-npm install react-native-vision-camera react-native-vision-camera-face-detector react-native-worklets-core react-native-reanimated react-native-fs react-native-image-resizer
+npm install react-native-vision-camera react-native-vision-camera-face-detector react-native-worklets-core react-native-reanimated react-native-fs react-native-image-resizer react-native-sound-player
 ```
 
 Then add the VisionCamera plugin to your Expo config (app.json, app.config.json or app.config.js): More details [here](https://react-native-vision-camera.com/docs/guides/).
