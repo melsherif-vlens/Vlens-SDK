@@ -26,6 +26,7 @@ const loginApi = async () => {
 
     // Extract accessToken from the response
     const accessToken = response.data?.data?.accessToken;
+    // const refreshToken = response.data?.data?.refreshToken;
 
     if (accessToken) {
       console.log('Access Token:', accessToken);

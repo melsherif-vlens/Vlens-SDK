@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import RNFS from 'react-native-fs';
-import { StyleSheet, View, TouchableOpacity, Text, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, Alert, Dimensions, Image } from 'react-native';
 import { Camera, useCameraDevice } from 'react-native-vision-camera';
 
 import verifyIdFrontApi from '../apis/front';
@@ -8,13 +8,24 @@ import verifyIdBackApi from '../apis/back';
 import compressBase64Image from '../utilities/compressBase64Image';
 
 import { useI18n } from '../localization/useI18n';
-import type { VLensSdkProps } from '../types/VLensSdkProps';
+import { sdkConfig } from '../appConfig';
 
-const NationalIdValidationPage = (props: VLensSdkProps) => {
+
+const { width } = Dimensions.get('window');
+const cardWidth = width;
+const cardHeight = cardWidth * 0.6;
+
+type NationalIdValidationPageProps = {
+    onNext: (error?: string) => void;
+    onPrev: () => void;
+}
+
+export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdValidationPageProps) {
 
     const device = useCameraDevice('back');
     const [cameraPermission, setCameraPermission] = useState(false);
     const [cameraRef, setCameraRef] = useState<Camera | null>(null);
+    const [flash, setFlash] = useState(false);
 
     const [step, setStep] = useState<'front' | 'back'>('front');
 
@@ -33,46 +44,34 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
 
     // API Calls
     const postFrontImage = async (base64: string) => {
-
         const base64Compressed = await compressBase64Image(base64);
-
-        const transactionId     = props?.transactionId;
-        const apiKey            = props?.apiKey;
-        const telencyName       = props?.telencyName;
-        const accessToken       = props.accessToken;
-
-        await verifyIdFrontApi(accessToken, apiKey, telencyName, transactionId, base64Compressed);
+        const transactionId = sdkConfig?.transactionId;
+        await verifyIdFrontApi(transactionId, base64Compressed);
     };
 
     const postBackImage = async (base64: string) => {
         setIsLoading(true);
 
         const base64Compressed = await compressBase64Image(base64);
-
-        const transactionId     = props?.transactionId;
-        const apiKey            = props?.apiKey;
-        const telencyName       = props?.telencyName;
-        const accessToken       = props?.accessToken;
-        const onSuccess         = props?.onSuccess;
-        const onFaild           = props?.onFaild;
+        const transactionId = sdkConfig?.transactionId;
 
         try {
-            await verifyIdBackApi(accessToken, apiKey, telencyName, transactionId, base64Compressed);
-            onSuccess();
+            await verifyIdBackApi(transactionId, base64Compressed);
+            onNext();
 
         } catch (error) {
             if (error instanceof Error) {
                 console.log('Error Message:', error.message);
                 Alert.alert(t('Error'), error.message);
-                onFaild(error.message);
+                onNext(error.message);
 
             } else {
                 console.log('Unexpected Error:', error);
                 console.log('Error during ID back verification:', error);
                 Alert.alert(t('Error'), t('internet_connection_error'));
-                onFaild('Internet connection error.');
+                onNext('Internet connection error.');
             }
-            
+
             setIsLoading(false);
         }
     };
@@ -82,7 +81,7 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
         if (!cameraRef) return;
 
         try {
-            const photo = await cameraRef.takePhoto({enableShutterSound: true}); // TODO: Add options with image quality 
+            const photo = await cameraRef.takePhoto({ enableShutterSound: true }); // TODO: Add options with image quality 
             const base64 = await RNFS.readFile(photo.path, 'base64');
 
             if (step === 'front') {
@@ -99,133 +98,274 @@ const NationalIdValidationPage = (props: VLensSdkProps) => {
         }
     };
 
+    const toggleFlash = () => {
+        console.log('Flash toggled');
+        setFlash(!flash);
+    };
+
     // Views
+    {/*  Camera Permission Denied View */ }
     if (!cameraPermission) {
         return (
-            <View style={styles.center}>
+            <View style={styles.container}>
                 <Text>{t('camera_permission_msg')}</Text>
             </View>
         );
     }
 
+    {/*  Camera Not Found View */ }
     if (!device) {
         return (
-            <View style={styles.center}>
-                <Text>{ t('no_camera_device_found') }</Text>
+            <View style={styles.container}>
+                <Text>{t('no_camera_device_found')}</Text>
             </View>
         );
     }
 
+    {/* Loading View */ }
+    if (isLoading) {
+        return (
+            <View style={styles.loadingContainer}>
+
+                {/* Logo and Title */}
+                <View style={styles.logoContainer}>
+                    <Image
+                        source={require("../assets/vlens_logo_temp.png")}
+                        style={styles.logo}
+                    />
+                    <Text style={styles.title}>{t('scanning_your_id')}</Text>
+                </View>
+
+                {/* Scanning Illustration */}
+                <View style={styles.scanIllustrationContainer}>
+                    <View style={styles.scanIllustration}>
+                        <Image
+                            source={require('../assets/face_id_vector.png')}
+                            style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }}
+                        />
+                    </View>
+                </View>
+
+                {/* Instructions */}
+                <Text style={styles.instructions}>{t('processing_your_id')}</Text>
+
+                {/* Footer */}
+                <View style={styles.footerContainer}>
+                    <Text style={styles.footerText}>{t('powered_by')}</Text>
+                    <Image source={require('../assets/vlens_logo_powered_by_icon.png')} style={styles.footerIcon} />
+                </View>
+
+            </View>
+        );
+    }
+
+    {/* Camera View */ }
     return (
         <View style={styles.container}>
-            {/* Camera View */}
-            <Camera
-                ref={(ref) => setCameraRef(ref)}
-                style={StyleSheet.absoluteFill}
-                device={device}
-                isActive={true}
-                photo={true}
-            />
 
-            {/* Card Overlay */}
-            <View style={styles.overlay}>
-                <View style={styles.cardFrame}>
+            {/* Header */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={onPrev}>
+                    <Image source={require('../assets/arrow_left.png')} style={styles.headerIcon} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>{t('camera')}</Text>
+                <TouchableOpacity onPress={toggleFlash}>
+                    <Image
+                        source={flash === false ? require('../assets/flash_turn_on_icon.png') : require('../assets/flash_turn_off_icon.png')}
+                        style={styles.headerIcon}
+                    />
+                </TouchableOpacity>
+            </View>
 
+            <View style={styles.cameraContainer}>
+                {/* Camera View */}
+                <Camera
+                    ref={(ref) => setCameraRef(ref)}
+                    style={styles.camera}
+                    device={device}
+                    isActive={true}
+                    photo={true}
+                    torch={flash == true ? 'on' : 'off'}
+                />
+
+                {/* Card Overlay */}
+                <View style={styles.overlay}>
+                    <Image
+                        source={step === 'front' ? require('../assets/scanning_natioanl_id_front_vector.png') : require('../assets/scanning_natioanl_id_back_vector.png')}
+                        style={styles.cardOutlineImage}
+                    />
+                    <Text style={styles.instructionText}>
+                        {step === 'front' ? t('align_id_front_side_msg') : t('align_id_back_side_msg')}
+                    </Text>
                 </View>
             </View>
 
             {/* Capture Button */}
-            <View style={styles.controls}>
-                <Text style={styles.cardInstruction}>
-                    { step === 'front' ? t('align_id_front_side_msg') : t('align_id_back_side_msg') }
-                </Text>
-                <TouchableOpacity style={styles.captureButton} onPress={captureImage} disabled={isLoading}>
+            <View style={styles.footer}>
+                <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
                     <View style={styles.captureCircle} />
                 </TouchableOpacity>
             </View>
-
-            {/* Progress Indicator */}
-            {isLoading && (
-                <View style={styles.loadingOverlay}>
-                    <ActivityIndicator size="large" color="#ffffff" />
-                    <Text style={styles.loadingText}>{ t('uploading_msg') }</Text>
-                </View>
-            )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        height: '100%',
+        flex: 1,
         width: '100%',
+        height: '100%',
+        backgroundColor: '#000',
     },
-    center: {
+    header: {
+        height: 120,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        backgroundColor: '#1a1a1a',
+        paddingTop: 50,
+    },
+    headerTitle: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    headerIcon: {
+        width: 30,
+        height: 30,
+        resizeMode: 'contain'
+    },
+    cameraContainer: {
+        flex: 1,
+        position: 'relative'
+    },
+    camera: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        width: '100%',
     },
     overlay: {
         position: 'absolute',
         top: 0,
-        bottom: 0,
         left: 0,
         right: 0,
-        justifyContent: 'center',
+        bottom: 0,
+        justifyContent: 'flex-end',
         alignItems: 'center',
+        paddingBottom: 20,
     },
-    cardFrame: {
-        width: 350,
-        height: 220,
-        borderWidth: 3,
-        borderColor: 'white',
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)', // Semi-transparent background
+    cardOutlineImage: {
+        width: cardWidth,
+        height: cardHeight,
+        resizeMode: 'contain',
+        position: 'absolute',
+        top: '30%',
     },
-    cardInstruction: {
-        color: 'white',
+    instructionText: {
+        width: '80%',
+        bottom: 20,
+        lineHeight: 22,
+        paddingVertical: 8,
+        paddingHorizontal: 50,
+        color: '#fff',
         fontSize: 16,
         textAlign: 'center',
-        marginTop: 10,
-        marginBottom: 30,
+        borderRadius: 10,
+        backgroundColor: '#13172295',
     },
-    controls: {
-        position: 'absolute',
-        bottom: 50,
+    footer: {
+        height: 160,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        width: '100%',
+        backgroundColor: '#1a1a1a',
     },
     captureButton: {
+        position: 'absolute',
+        bottom: 50,
+        alignSelf: 'center',
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#fff', // Outer white circle
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5, // Shadow for Android
+    },
+    captureCircle: {
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: 'white',
-        justifyContent: 'center',
-        alignItems: 'center',
+        borderColor: '#1a1a1a',
+        borderWidth: 4,
+        backgroundColor: '#fff', 
     },
-    captureCircle: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: 'gray',
+    logoContainer: {
+        alignItems: "center",
+        margin: 20,
     },
-    loadingOverlay: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        justifyContent: 'center',
-        alignItems: 'center',
+    logo: {
+        width: 150,
+        height: 100,
+        resizeMode: "contain",
+        marginTop: 40,
     },
-    loadingText: {
-        color: 'white',
-        fontSize: 16,
+    title: {
+        fontSize: 28,
+        fontWeight: "bold",
+        color: sdkConfig.colors.primary,
         marginTop: 10,
     },
+    loadingContainer: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+        backgroundColor: sdkConfig.colors.background,
+    },
+    scanIllustrationContainer: {
+        flex: 1,
+        marginVertical: 20,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    scanIllustration: {
+        marginVertical: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: sdkConfig.colors.secondary,
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+    },
+    instructions: {
+        textAlign: "center",
+        fontSize: 18,
+        color: sdkConfig.colors.accent,
+        paddingHorizontal: 40,
+        marginBottom: 80,
+        lineHeight: 25,
+    },
+    footerContainer: {
+        height: 60,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        marginBottom: 40,
+    },
+    footerText: {
+        fontSize: 14,
+        color: sdkConfig.colors.accent,
+        alignItems: "center",
+        paddingTop: 4,
+        paddingEnd: 5,
+    },
+    footerIcon: {
+        width: 60,
+        height: 20,
+        resizeMode: "contain",
+    }
 });
-
-export default NationalIdValidationPage;

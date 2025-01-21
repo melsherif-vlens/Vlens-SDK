@@ -1,10 +1,44 @@
-export type ApiError = {
-    error_code: number;
-    error_message_en: string;
-    error_message_ar: string;
-};
+import axios, { AxiosError } from 'axios';
+import type { ApiError } from '../types/SdkConfig';
 
-export const apiErrors: ApiError[] = [
+interface ApiErrorResponse {
+    error_code: number;
+    error_message: string;
+    data: any | null;
+}
+
+export const handleApiError = (error: any) => {
+    // Handle API errors
+    if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ApiErrorResponse>;
+        console.log('Axios Error:', axiosError.code);
+
+        // Handle API response errors
+        if (axiosError.response) {
+            const { error_code } = axiosError.response.data || {};
+
+            console.log('API Error Code:', error_code);
+            const error_message = getApiError(error_code);
+            console.log('API Error Message:', error_message);
+
+            // Throw a structured error object
+            return new Error(
+                `${error_message}`
+            );
+        } else {
+            // Handle network errors
+            console.log('Network issue or no response from server.');
+            return new Error('Network issue or no response from server.');
+        }
+    } else {
+        // Handle other unexpected errors
+        console.log('An unexpected error occurred:', error);
+        return new Error('An unexpected error occurred.');
+    }
+}
+
+
+export const defaultApiErrors: ApiError[] = [
     {
         error_code: 400,
         error_message_en: 'Make sure all the required parameters are included.',
@@ -257,7 +291,7 @@ export const apiErrors: ApiError[] = [
     },
 ];
  
-export const getApiError = (errorCode: number, errorsData: ApiError[] = apiErrors): string => {
+export const getApiError = (errorCode: number, errorsData: ApiError[] = defaultApiErrors): string => {
     let errorItem = errorsData.find((error) => error.error_code === errorCode);
     return errorItem ? errorItem.error_message_en : 'An unknown error occurred.';
 }

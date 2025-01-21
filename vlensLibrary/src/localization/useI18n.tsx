@@ -14,34 +14,21 @@ type UseI18nReturn = {
 };
 
 export function useI18n(): UseI18nReturn {
-    // ----------------------------------------------------------------------------------------------------
-    // MARK: States & Constants
-    // ----------------------------------------------------------------------------------------------------
-    // TODO: Replace this to use I18XS later
+
     const i18n = new I18n({
         en,
         ar,
     });
 
-    i18n.locale = sdkConfig.i18n.defaultLocale;
+    i18n.locale = sdkConfig.defaultLocale;
 
     const t = (key: string) => i18n.t(key);
-    const locale = sdkConfig.i18n.defaultLocale;
-    i18n.locale = sdkConfig.i18n.defaultLocale;
+    const locale = sdkConfig.defaultLocale;
+    i18n.locale = sdkConfig.defaultLocale;
     const isArabic = locale === 'ar';
     const isRTL = isArabic;
     const direction = isRTL ? 'rtl' : 'ltr';
 
-    // ----------------------------------------------------------------------------------------------------
-    // MARK: Functions
-    // ----------------------------------------------------------------------------------------------------
-    // function changeLocale(locale: string): void {
-    //     i18n.locale = locale ?? getLocales()[0]?.languageCode ?? sdkConfig.i18n.defaultLocale;
-    // }
-
-    // ----------------------------------------------------------------------------------------------------
-    // MARK: Return
-    // ----------------------------------------------------------------------------------------------------
     return {
         t,
         locale,

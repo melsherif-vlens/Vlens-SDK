@@ -56,4 +56,4 @@ import VLensView from 'react-native-vlens';
 
 ## Contact
 
-For any questions or support, please contact us at mtaher@vlens.com.
+For any questions or support, please contact us at support@vlenseg.com.

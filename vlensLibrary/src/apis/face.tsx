@@ -1,14 +1,11 @@
-import axios, { AxiosError } from 'axios';
+import API from './api';
 import { sdkConfig } from '../appConfig';
-import { getApiError } from './ApiError';
+import { handleApiError } from './ApiError';
 
-interface ApiErrorResponse {
-    error_code: number;
-    error_message: string;
-    data: any | null;
-}
-const verifyFaceApi = async (accessToken: string, apiKey: string, tenancyName: string, transactionId: string, face1: string, face2: string, face3: string) => {
-    const url = sdkConfig.env.apiBaseUrl + 'api/DigitalIdentity/verify/liveness/multi';
+const verifyFaceApi = async (transactionId: string, face1: string, face2: string, face3: string) => {
+    const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/liveness/multi';
+
+    console.log('URL:', url);
 
     const requestBody = {
         transaction_id: transactionId,
@@ -17,19 +14,10 @@ const verifyFaceApi = async (accessToken: string, apiKey: string, tenancyName: s
         face_3: face3
     };
 
-    const headers = {
-        'Content-Type': 'application/json',
-        Accept: 'text/plain',
-        Authorization: 'Bearer ' + accessToken,
-        ApiKey: apiKey,
-        TenancyName: tenancyName,
-    };
-
-    console.log('Headers:', headers);
-    console.log('Request Body:', requestBody);
+    // console.log('Request Body:', requestBody);
 
     try {
-        const response = await axios.post(url, requestBody, { headers });
+        const response = await API.post(url, requestBody);
 
         // Extracting relevant data from the response
         console.log('Response:', response.data);
@@ -47,31 +35,7 @@ const verifyFaceApi = async (accessToken: string, apiKey: string, tenancyName: s
         return { isVerificationProcessCompleted, isDigitalIdentityVerified };
     } catch (error) {
         // Handle API errors
-        if (axios.isAxiosError(error)) {
-            const axiosError = error as AxiosError<ApiErrorResponse>;
-
-            // Handle API response errors
-            if (axiosError.response) {
-                const { error_code } = axiosError.response.data || {};
-
-                const error_message = getApiError(error_code);
-                console.error('API Error Code:', error_code);
-                console.error('API Error Message:', error_message);
-
-                // Throw a structured error object
-                throw new Error(
-                    `${error_message}`
-                );
-            } else {
-                // Handle network errors
-                console.error('Network issue or no response from server.');
-                throw new Error('Network issue or no response from server.');
-            }
-        } else {
-            // Handle other unexpected errors
-            console.error('An unexpected error occurred:', error);
-            throw new Error('An unexpected error occurred.');
-        }
+        throw handleApiError(error);
     }
 };
 

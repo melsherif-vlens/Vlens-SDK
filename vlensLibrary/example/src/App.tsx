@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 
 import loginApi from './loginApi';
@@ -69,12 +70,26 @@ export default function App() {
   if (isVlensMode) {
     return (
       <VLensView
-        telencyName={_telencyName} 
-        apiKey={_apiKey} 
         transactionId={transactionId}
-        accessToken={accessToken}
         isLivenessOnly={isLivenessOnly.current}
-        locale="ar"
+        isNationalIdOnly={false}
+        env={{
+          apiBaseUrl: 'https://api.vlenseg.com',
+          accessToken: accessToken,
+          refreshToken: '',
+          apiKey: _apiKey,
+          tenancyName: _telencyName,
+        }}
+        defaultLocale={'en'}
+        colors={{
+          accent: '#4E5A78',
+          primary: '#397374',
+          secondary: '#AF9759',
+          background: '#FEFEFE',
+          dark: '#000000',
+          light: '#FFFFFF',
+      }}
+        errorMessages={[]} // comming soon
         onSuccess={onVLensSuccess}
         onFaild={onVLensFaild}
       />
@@ -84,6 +99,11 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>VLens React SDK Demo</Text>
+
+      <Image 
+        source={require('../assets/vlens_logo_temp.png')} 
+        style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }} 
+      />
 
       <Text style={styles.label}>Transaction ID</Text>
       <TextInput
@@ -103,7 +123,7 @@ export default function App() {
       />
 
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#397374" />
       ) : (
         <>
           <TouchableOpacity style={styles.button} onPress={handleSetDefaultData}>
@@ -127,15 +147,17 @@ const styles = StyleSheet.create({
     margin: 20
   },
   title: {
-    fontSize: 20,
+    fontSize: 23,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
     marginTop: 20,
+    color: '#397374',
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
+    color: '#204061'
   },
   trxIdInput: {
     height: 40,
@@ -147,7 +169,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
   accessTokenInput: {
-    height: 350,
+    height: 250,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
@@ -157,9 +179,9 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 40,
-    backgroundColor: '#007BFF',
+    backgroundColor: '#397374',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
     marginBottom: 10,
   },
   buttonText: {
