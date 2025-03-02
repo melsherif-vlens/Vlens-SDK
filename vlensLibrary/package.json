@@ -1,6 +1,6 @@
 {
   "name": "react-native-vlens",
-  "version": "0.1.6",
+  "version": "0.1.8",
   "description": "vlens",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -53,14 +53,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MohamedT-Silverkey/react-native-vlens.git"
+    "url": "git+https://github.com/melsherif-vlens/Vlens-SDK.git"
   },
-  "author": "Mohamed Taher <mohamedt@silverkeytech.com> (https://github.com/MohamedT-Silverkey)",
+  "author": "Mohamed Taher <mtaher@vlenseg.com> (https://github.com/MTaher204)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MohamedT-Silverkey/react-native-vlens/issues"
+    "url": "https://github.com/melsherif-vlens/Vlens-SDK/issues"
   },
-  "homepage": "https://github.com/MohamedT-Silverkey/react-native-vlens#readme",
+  "homepage": "https://github.com/melsherif-vlens/Vlens-SDK#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

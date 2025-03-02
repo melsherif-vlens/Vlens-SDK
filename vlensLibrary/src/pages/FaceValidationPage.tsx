@@ -442,7 +442,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
                 <View style={styles.scanIllustrationContainer}>
                     <View style={styles.scanIllustration}>
                         <Image
-                            source={require('../assets/face_id_vector.png')}
+                            source={require('../assets/person_scan_final.gif')}
                             style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }}
                         />
                     </View>

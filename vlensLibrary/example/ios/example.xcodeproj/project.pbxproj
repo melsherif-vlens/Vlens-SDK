@@ -359,7 +359,7 @@
 				CODE_SIGN_ENTITLEMENTS = example/example.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = UVDA5XSL97;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -399,7 +399,7 @@
 				CODE_SIGN_ENTITLEMENTS = example/example.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = UVDA5XSL97;
 				INFOPLIST_FILE = example/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "VLens React Demo";

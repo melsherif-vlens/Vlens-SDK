@@ -32,5 +32,6 @@
     "national_id_instructions" : "To get started, we need to verify your identity. Please take a clear photo of both the front and back of your ID.",
     "national_id_tip_1" : "Make sure you’re in a well-lit area so your ID and face are clearly visible.",
     "national_id_tip_2" : "Make sure it's easy to read!",
-    "scan_id" : "Scan ID"
+    "scan_id" : "Scan ID",
+    "id_flip_msg": "Please flip your ID"
 }

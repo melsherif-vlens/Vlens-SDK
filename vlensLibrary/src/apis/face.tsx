@@ -23,11 +23,15 @@ const verifyFaceApi = async (transactionId: string, face1: string, face2: string
         console.log('Response:', response.data);
         console.log('validation_errors:', response.data.services.Validations.validation_errors);
 
+        const { error_code } = response.data || {};
+        if (error_code) {
+            throw handleApiError(response.data);
+        }
+        
         response.data.services.Validations.validation_errors.forEach((element: any) => {
             console.log('validation_errors:', element.errors);
         });
-        const { isVerificationProcessCompleted, isDigitalIdentityVerified } =
-            response.data?.data || {};
+        const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};
 
         console.log('Verification Completed:', isVerificationProcessCompleted);
         console.log('Digital Identity Verified:', isDigitalIdentityVerified);

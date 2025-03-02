@@ -19,6 +19,11 @@ const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
         console.log('Response:', response.data);
         
         // Extracting relevant data from the response
+        const { error_code } = response.data || {};
+        if (error_code) {
+            throw handleApiError(response.data);
+        }
+
         const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};
 
         console.log('Verification Completed:', isVerificationProcessCompleted);

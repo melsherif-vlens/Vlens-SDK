@@ -27,7 +27,7 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
     const [cameraRef, setCameraRef] = useState<Camera | null>(null);
     const [flash, setFlash] = useState(false);
 
-    const [step, setStep] = useState<'front' | 'back'>('front');
+    const [step, setStep] = useState<'front' | 'flip' | 'back'>('front');
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -62,13 +62,13 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
         } catch (error) {
             if (error instanceof Error) {
                 console.log('Error Message:', error.message);
-                Alert.alert(t('Error'), error.message);
+                // Alert.alert(t('Error'), error.message);
                 onNext(error.message);
 
             } else {
                 console.log('Unexpected Error:', error);
                 console.log('Error during ID back verification:', error);
-                Alert.alert(t('Error'), t('internet_connection_error'));
+                // Alert.alert(t('Error'), t('internet_connection_error'));
                 onNext('Internet connection error.');
             }
 
@@ -86,8 +86,15 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
 
             if (step === 'front') {
                 // Alert.alert(t('success'), t('front_image_captured'));
-                setStep('back');
+                setStep('flip');
                 postFrontImage(base64);
+
+                setTimeout(() => {
+                    setStep('back');
+                }, 2000);
+
+                // clearTimeout(timeout); // Not needed
+
             } else if (step === 'back') {
                 // Alert.alert(t('success'), t('back_image_captured'));
                 postBackImage(base64);
@@ -101,6 +108,47 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
     const toggleFlash = () => {
         console.log('Flash toggled');
         setFlash(!flash);
+    };
+
+    const getCameraOverlayView = () => {
+
+        if (step === 'flip') {
+            return (
+                <View style={styles.overlay}>
+                    <Image
+                        source={require('../assets/id_flip.gif')}
+                        style={styles.cardOutlineImage}
+                    />
+                    <Text style={styles.instructionText}>
+                        {t('id_flip_msg')}
+                    </Text>
+                </View>
+            );
+        } else if (step === 'back') {
+            return (
+                <View style={styles.overlay}>
+                    <Image
+                        source={require('../assets/scanning_natioanl_id_back_vector.png')}
+                        style={styles.cardOutlineImage}
+                    />
+                    <Text style={styles.instructionText}>
+                        {t('align_id_back_side_msg')}
+                    </Text>
+                </View>
+            );
+        };
+
+        return (
+            <View style={styles.overlay}>
+                <Image
+                    source={require('../assets/scanning_natioanl_id_front_vector.png')}
+                    style={styles.cardOutlineImage}
+                />
+                <Text style={styles.instructionText}>
+                    {t('align_id_front_side_msg')}
+                </Text>
+            </View>
+        );
     };
 
     // Views
@@ -140,7 +188,7 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
                 <View style={styles.scanIllustrationContainer}>
                     <View style={styles.scanIllustration}>
                         <Image
-                            source={require('../assets/face_id_vector.png')}
+                            source={require('../assets/scan_id_final.gif')}
                             style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }}
                         />
                     </View>
@@ -189,22 +237,16 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
                 />
 
                 {/* Card Overlay */}
-                <View style={styles.overlay}>
-                    <Image
-                        source={step === 'front' ? require('../assets/scanning_natioanl_id_front_vector.png') : require('../assets/scanning_natioanl_id_back_vector.png')}
-                        style={styles.cardOutlineImage}
-                    />
-                    <Text style={styles.instructionText}>
-                        {step === 'front' ? t('align_id_front_side_msg') : t('align_id_back_side_msg')}
-                    </Text>
-                </View>
+                {getCameraOverlayView()}
             </View>
 
             {/* Capture Button */}
             <View style={styles.footer}>
-                <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
-                    <View style={styles.captureCircle} />
-                </TouchableOpacity>
+                {step !== 'flip' ?
+                    <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
+                        <View style={styles.captureCircle} />
+                    </TouchableOpacity>
+                    : null}
             </View>
         </View>
     );
@@ -301,7 +343,7 @@ const styles = StyleSheet.create({
         borderRadius: 35,
         borderColor: '#1a1a1a',
         borderWidth: 4,
-        backgroundColor: '#fff', 
+        backgroundColor: '#fff',
     },
     logoContainer: {
         alignItems: "center",
