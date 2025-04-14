@@ -273,6 +273,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
             const leftEyeOpenProbability = face.leftEyeOpenProbability;
             const rightEyeOpenProbability = face.rightEyeOpenProbability;
             const yawAngle = face.yawAngle;
+            const adjustedYawAngle = -yawAngle; // as we are using front camera
             const smilingProbability = face.smilingProbability;
 
             console.log('Face Detected with:', leftEyeOpenProbability, rightEyeOpenProbability, yawAngle, smilingProbability);
@@ -316,7 +317,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
             }
 
             if (currentFace == 'Turned Right') {
-                if (yawAngle > 13) {
+                if (adjustedYawAngle > 13) {
                     console.log('Turned Right');
                     // needsToGetPicture = true;
                     currentFaceValue = await getBase64ImageFromCamira() as string;
@@ -324,7 +325,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
             }
 
             if (currentFace == 'Turned Left') {
-                if (yawAngle < -13) {
+                if (adjustedYawAngle < -13) {
                     console.log('Turned Left');
                     // needsToGetPicture = true;
                     currentFaceValue = await getBase64ImageFromCamira() as string;
@@ -332,7 +333,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
             }
 
             if (currentFace == 'Looking Straight') {
-                if (yawAngle > -10 && yawAngle < 10) {
+                if (adjustedYawAngle > -10 && adjustedYawAngle < 10) {
                     console.log('Looking Straight');
                     // needsToGetPicture = true;
                     currentFaceValue = await getBase64ImageFromCamira() as string;

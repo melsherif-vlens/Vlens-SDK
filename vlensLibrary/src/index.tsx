@@ -108,7 +108,7 @@ const VLensView = (props: VLensViewProps) => {
     if (step === 'startNationalId') {
         return (
             <View style={styles.container}>
-                <StartNationalIdValidationPage onNext={onNext} />
+                <StartNationalIdValidationPage onNext={onNext} onPrev={onPrev} />
             </View>
         );
     }
@@ -126,7 +126,7 @@ const VLensView = (props: VLensViewProps) => {
     if (step === 'startFace') {
         return (
             <View style={styles.container}>
-                <StartFaceValidationPage onNext={onNext} />
+                <StartFaceValidationPage onNext={onNext} onPrev={onPrev} />
             </View>
         );
     }

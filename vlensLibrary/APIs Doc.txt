@@ -1,0 +1,87 @@
+APIs Doc 
+
+Responses:
+1. In case of error in POST Front national id image 
+{
+  "services": {
+    "Validations": {
+      "validation_errors": [
+        {
+          "field": null,
+          "value": null,
+          "errors": [
+            {
+              "code": 3011,
+              "message": "Card not detected from image"
+            }
+          ]
+        }
+      ]
+    },
+    "spoofing": null,
+    "classification": {
+      "doc_type": null
+    },
+    "liveness": null,
+    "AML": null,
+    "SRC": null
+  },
+  "data": {
+    "isVerificationProcessCompleted": false,
+    "isDigitalIdentityVerified": null,
+    "deviceInfo": null,
+    "user": null,
+    "idFrontData": null,
+    "idBackData": null
+  },
+  "error_code": null,
+  "error_message": null
+}
+
+
+2. In case of error in POST Back national id image 
+{
+  "services": {
+    "Validations": {
+      "validation_errors": [
+        {
+          "field": null,
+          "value": null,
+          "errors": [
+            {
+              "code": 3011,
+              "message": "Card not detected from image"
+            }
+          ]
+        },
+        {
+          "field": null,
+          "value": null,
+          "errors": [
+            {
+              "code": 3011,
+              "message": "Card not detected from image"
+            }
+          ]
+        }
+      ]
+    },
+    "spoofing": null,
+    "classification": {
+      "doc_type": null
+    },
+    "liveness": null,
+    "AML": null,
+    "SRC": null
+  },
+  "data": {
+    "isVerificationProcessCompleted": false,
+    "isDigitalIdentityVerified": null,
+    "deviceInfo": null,
+    "user": null,
+    "idFrontData": null,
+    "idBackData": null
+  },
+  "error_code": null,
+  "error_message": null
+}

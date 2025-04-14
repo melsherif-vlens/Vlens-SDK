@@ -4,9 +4,10 @@ import { useI18n } from '../localization/useI18n';
 
 type StartNationalIdValidationPageProps = {
     onNext: (error?: string) => void;
+    onPrev: () => void;
 }
 
-export default function StartNationalIdValidationPage ({ onNext }: StartNationalIdValidationPageProps) {
+export default function StartNationalIdValidationPage ({ onNext, onPrev }: StartNationalIdValidationPageProps) {
 
     const { t } = useI18n();
 
@@ -16,6 +17,13 @@ export default function StartNationalIdValidationPage ({ onNext }: StartNational
     
     return (
         <View style={styles.container}>
+
+            {/* Toolbar */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={onPrev}>
+                    <Image source={require('../assets/arrow_left.png')} style={styles.headerIcon} />
+                </TouchableOpacity>
+            </View>
 
             {/* Logo and Title */}
             <View style={styles.logoContainer}>
@@ -72,6 +80,22 @@ const styles = StyleSheet.create({
         backgroundColor: sdkConfig.colors.background,
         alignItems: "center",
     },
+    header: {
+        height: 100,
+        alignSelf: 'stretch',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        paddingTop: 50,
+    },
+    headerIcon: {
+        width: 30,
+        height: 30,
+        resizeMode: 'contain',
+        tintColor: 'black',
+    },
     logoContainer: {
         alignItems: "center",
         margin: 20,
@@ -80,7 +104,6 @@ const styles = StyleSheet.create({
         width: 150,
         height: 100,
         resizeMode: "contain",
-        marginTop: 40,
     },
     title: {
         fontSize: 28,

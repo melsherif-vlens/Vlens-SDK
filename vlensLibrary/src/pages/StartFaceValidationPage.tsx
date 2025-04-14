@@ -6,9 +6,10 @@ import { useI18n } from '../localization/useI18n';
 
 type StartFaceValidationPageProps = {
     onNext: (error?: string) => void;
+    onPrev: () => void;
 }
 
-export default function  StartFaceValidationPage ({ onNext }: StartFaceValidationPageProps) {
+export default function  StartFaceValidationPage ({ onNext, onPrev }: StartFaceValidationPageProps) {
 
     const { t } = useI18n();
 
@@ -18,6 +19,13 @@ export default function  StartFaceValidationPage ({ onNext }: StartFaceValidatio
     
     return (
         <View style={styles.container}>
+
+            {/* Toolbar */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={onPrev}>
+                    <Image source={require('../assets/arrow_left.png')} style={styles.headerIcon} />
+                </TouchableOpacity>
+            </View>
 
             {/* Logo and Title */}
             <View style={styles.logoContainer}>
@@ -72,6 +80,22 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: sdkConfig.colors.background,
         alignItems: "center",
+    },
+    header: {
+        height: 100,
+        alignSelf: 'stretch',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        paddingTop: 50,
+    },
+    headerIcon: {
+        width: 30,
+        height: 30,
+        resizeMode: 'contain',
+        tintColor: 'black',
     },
     logoContainer: {
         alignItems: "center",
