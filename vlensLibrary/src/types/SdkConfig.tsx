@@ -36,5 +36,5 @@ export type SdkConfig = {
     colors: ColorConfig;
     errorMessages: ApiError[];
     onSuccess: () => void;
-    onFaild: (error: string) => void;
+    onFaild: (code: string, error: string) => void;
 };

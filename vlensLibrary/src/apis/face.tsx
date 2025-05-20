@@ -1,6 +1,6 @@
 import API from './api';
 import { sdkConfig } from '../appConfig';
-import { handleApiError } from './ApiError';
+import { checkIfThereIsError } from './ApiError';
 
 const verifyFaceApi = async (transactionId: string, face1: string, face2: string, face3: string) => {
     const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/liveness/multi';
@@ -16,31 +16,24 @@ const verifyFaceApi = async (transactionId: string, face1: string, face2: string
 
     // console.log('Request Body:', requestBody);
 
-    try {
-        const response = await API.post(url, requestBody);
+    const response = await API.post(url, requestBody);
 
-        // Extracting relevant data from the response
-        console.log('Response:', response.data);
-        console.log('validation_errors:', response.data.services.Validations.validation_errors);
-
-        const { error_code } = response.data || {};
-        if (error_code) {
-            throw handleApiError(response.data);
-        }
+    // Extracting relevant data from the response
+    console.log('Response:', response.data);
+    console.log('validation_errors:', response.data.services.Validations.validation_errors);
         
-        response.data.services.Validations.validation_errors.forEach((element: any) => {
-            console.log('validation_errors:', element.errors);
-        });
-        const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};
-
-        console.log('Verification Completed:', isVerificationProcessCompleted);
-        console.log('Digital Identity Verified:', isDigitalIdentityVerified);
-
-        return { isVerificationProcessCompleted, isDigitalIdentityVerified };
-    } catch (error) {
-        // Handle API errors
-        throw handleApiError(error);
+    const {errorCode, errorMessage} = checkIfThereIsError(response);
+    if (errorCode != -1) {
+        console.error('API Error:', errorCode, errorMessage);
+        throw { errorCode, errorMessage };
     }
+
+    const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};
+
+    console.log('Verification Completed:', isVerificationProcessCompleted);
+    console.log('Digital Identity Verified:', isDigitalIdentityVerified);
+
+    return { isVerificationProcessCompleted, isDigitalIdentityVerified };
 };
 
 export default verifyFaceApi;

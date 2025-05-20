@@ -33,5 +33,8 @@
     "national_id_tip_1" : "Make sure you’re in a well-lit area so your ID and face are clearly visible.",
     "national_id_tip_2" : "Make sure it's easy to read!",
     "scan_id" : "Scan ID",
-    "id_flip_msg": "Please flip your ID"
+    "id_flip_msg": "Please flip your ID",
+    "id_error_msg": "Unable to verify the ID. Ensure it's clear and fully visible.",
+    "retry_scanning" : "Retry Scanning",
+    "exist" : "Close"
 }

@@ -16,7 +16,7 @@ const cardWidth = width;
 const cardHeight = cardWidth * 0.6;
 
 type NationalIdValidationPageProps = {
-    onNext: (error?: string) => void;
+    onNext: (errorCode?: string, error?: string) => void;
     onPrev: () => void;
 }
 
@@ -30,6 +30,18 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
     const [step, setStep] = useState<'front' | 'flip' | 'back'>('front');
 
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+    const [errorCode, setErrorCode] = useState(-1);
+
+    const [didPostFrontImage, setDidPostFrontImage] = useState(false);
+    const [didPostBackImage, setDidPostBackImage] = useState(false);
+
+    useEffect(() => {
+        if (didPostFrontImage && didPostBackImage) {
+            handleApiResponse();
+        }
+    }, [didPostFrontImage, didPostBackImage]);
+    
 
     const { t } = useI18n();
 
@@ -44,12 +56,43 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
 
     // API Calls
     const postFrontImage = async (base64: string) => {
-        const base64Compressed = await compressBase64Image(base64);
-        const transactionId = sdkConfig?.transactionId;
-        await verifyIdFrontApi(transactionId, base64Compressed);
+        console.log('POST Front Image)');
+        try {
+            const base64Compressed = await compressBase64Image(base64);
+            const transactionId = sdkConfig?.transactionId;
+            await verifyIdFrontApi(transactionId, base64Compressed);
+        } catch (error) {
+            var errorMessage = '';
+            var errorCode = -1;
+
+            if (typeof error === 'object' && error !== null) {
+                const { errorCode: code, errorMessage: message } = error as any;
+                if (code !== undefined && message !== undefined) {
+                    errorCode = code;
+                    errorMessage = message;
+                    console.log('API Response Error:', errorCode, errorMessage);
+                } else {
+                    console.log('Unexpected Error:', error);
+                    errorMessage = 'Internet connection error.';
+                }
+            } else {
+                console.log('Unexpected Error:', error);
+                errorMessage = 'Internet connection error.';
+            }
+
+            if (errorMessage == '') {
+                errorMessage = t('id_error_msg');
+            }
+
+            setErrorCode(errorCode);
+            setErrorMsg(errorMessage);
+        } finally {
+            setDidPostFrontImage(true);
+        }
     };
 
     const postBackImage = async (base64: string) => {
+        console.log('POST Back Image)');
         setIsLoading(true);
 
         const base64Compressed = await compressBase64Image(base64);
@@ -57,24 +100,53 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
 
         try {
             await verifyIdBackApi(transactionId, base64Compressed);
-            onNext();
-
         } catch (error) {
-            if (error instanceof Error) {
-                console.log('Error Message:', error.message);
-                // Alert.alert(t('Error'), error.message);
-                onNext(error.message);
+            var errorMessage = '';
+            var errorCode = -1;
 
+            if (typeof error === 'object' && error !== null) {
+                const { errorCode: code, errorMessage: message } = error as any;
+                if (code !== undefined && message !== undefined) {
+                    errorCode = code;
+                    errorMessage = message;
+                    console.log('API Response Error:', errorCode, errorMessage);
+                } else {
+                    console.log('Unexpected Error:', error);
+                    errorMessage = 'Internet connection error.';
+                }
             } else {
                 console.log('Unexpected Error:', error);
-                console.log('Error during ID back verification:', error);
-                // Alert.alert(t('Error'), t('internet_connection_error'));
-                onNext('Internet connection error.');
+                errorMessage = 'Internet connection error.';
             }
 
-            setIsLoading(false);
+            if (errorMessage == '') {
+                errorMessage = t('id_error_msg');
+            }
+
+            setErrorCode(errorCode);
+            setErrorMsg(errorMessage);
+        } finally {
+            setDidPostBackImage(true);
         }
     };
+
+    const handleApiResponse = () => {
+        console.log('handleApiResponse:', { didPostFrontImage, didPostBackImage, errorMsg, errorCode });
+        if (didPostFrontImage !== true || didPostBackImage !== true) {
+            return;
+        }
+
+        setIsLoading(false);
+
+        if (errorMsg !== '' || errorCode !== -1) {
+            // console.log('Call OnNext with Error:', errorMsg, errorCode);
+            // onNext(errorCode.toString(), errorMsg);
+            return;
+        }
+
+
+        onNext();
+    }
 
     // Camera Functions
     const captureImage = async () => {
@@ -151,6 +223,18 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
         );
     };
 
+    const handleRetryScanning = () => {
+        setErrorMsg('');
+        setErrorCode(-1);
+        setStep('front');
+        setDidPostFrontImage(false);
+        setDidPostBackImage(false);
+    };
+
+    const handleExist = () => {
+        onNext(errorCode.toString(), errorMsg);
+    };
+
     // Views
     {/*  Camera Permission Denied View */ }
     if (!cameraPermission) {
@@ -196,6 +280,57 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
 
                 {/* Instructions */}
                 <Text style={styles.instructions}>{t('processing_your_id')}</Text>
+
+                {/* Footer */}
+                <View style={styles.footerContainer}>
+                    <Text style={styles.footerText}>{t('powered_by')}</Text>
+                    <Image source={require('../assets/vlens_logo_powered_by_icon.png')} style={styles.footerIcon} />
+                </View>
+
+            </View>
+        );
+    }
+
+    {/* Error View */ }
+    if ((errorMsg !== '' || errorCode !== -1) && didPostBackImage === true && didPostFrontImage === true) {
+        return (
+            <View style={styles.loadingContainer}>
+
+                {/* Logo and Title */}
+                <View style={styles.logoContainer}>
+                    <Image
+                        source={require("../assets/vlens_logo_temp.png")}
+                        style={styles.logo}
+                    />
+                    <Text style={styles.title}>{t('scanning_your_id')}</Text>
+                </View>
+
+                {/* Error Illustration */}
+                <View style={styles.scanIllustrationContainer}>
+                    <View style={styles.scanIllustration}>
+                        <Image
+                            source={require('../assets/id_error_final.gif')}
+                            style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }}
+                        />
+                    </View>
+                </View>
+
+                {/* Instructions */}
+                <Text style={styles.instructions}>{errorMsg !== '' ? errorMsg : t('id_error_msg')}</Text>
+
+                {/* Scan ID Button */}
+                <View style={styles.scanButtonContainer}>
+                    <TouchableOpacity style={styles.scanButton} onPress={handleRetryScanning}>
+                        <Text style={styles.scanButtonText}>{t('retry_scanning')}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Exist Button */}
+                <View style={styles.existButtonContainer}>
+                    <TouchableOpacity style={styles.existButton} onPress={handleExist}>
+                        <Text style={styles.existButtonText}>{t('exist')}</Text>
+                    </TouchableOpacity>
+                </View>
 
                 {/* Footer */}
                 <View style={styles.footerContainer}>
@@ -409,5 +544,49 @@ const styles = StyleSheet.create({
         width: 60,
         height: 20,
         resizeMode: "contain",
+    },
+    scanButtonContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%"
+    },
+    scanButton: {
+        backgroundColor: sdkConfig.colors.primary,
+        paddingVertical: 15,
+        alignItems: "center",
+        paddingHorizontal: 50,
+        borderRadius: 16,
+        marginVertical: 5,
+        marginHorizontal: 20,
+        width: "90%",
+    },
+    scanButtonText: {
+        color: sdkConfig.colors.light,
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    existButtonContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%"
+    },
+    existButton: {
+        backgroundColor: sdkConfig.colors.light,
+        paddingVertical: 15,
+        alignItems: "center",
+        paddingHorizontal: 50,
+        borderRadius: 16,
+        marginVertical: 5,
+        marginHorizontal: 20,
+        width: "90%",
+        borderWidth: 1,
+        borderColor: sdkConfig.colors.primary
+    },
+    existButtonText: {
+        color: sdkConfig.colors.primary,
+        fontSize: 16,
+        fontWeight: "bold",
     }
 });

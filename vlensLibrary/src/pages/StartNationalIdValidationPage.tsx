@@ -3,7 +3,7 @@ import { sdkConfig } from "../appConfig";
 import { useI18n } from '../localization/useI18n';
 
 type StartNationalIdValidationPageProps = {
-    onNext: (error?: string) => void;
+    onNext: (errorCode?: string, error?: string) => void;
     onPrev: () => void;
 }
 

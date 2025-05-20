@@ -5,7 +5,7 @@ import { useI18n } from '../localization/useI18n';
 
 
 type StartFaceValidationPageProps = {
-    onNext: (error?: string) => void;
+    onNext: (errorCode?: string, error?: string) => void;
     onPrev: () => void;
 }
 

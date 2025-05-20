@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import RNFS from 'react-native-fs';
-import { StyleSheet, View, Text, Image, TouchableOpacity, Platform, Vibration } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, Platform, Vibration, ActivityIndicator } from 'react-native';
 import { Camera, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera';
 import { useFaceDetector } from 'react-native-vision-camera-face-detector'
 import type { Face, FaceDetectionOptions } from 'react-native-vision-camera-face-detector'
@@ -15,7 +15,7 @@ import SoundPlayer from 'react-native-sound-player'
 
 
 type FaceValidationPageProps = {
-    onNext: (error?: string) => void;
+    onNext: (errorCode?: string, error?: string) => void;
     onPrev: () => void;
 }
 
@@ -44,9 +44,13 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
     const face2Value = useRef<string>('');
     const face3Value = useRef<string>('');
 
+    const [errorMsg, setErrorMsg] = useState('');
+    const [errorCode, setErrorCode] = useState(-1);
+    
     const isCamiraActive = useRef(true);
 
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingImage, setIsLoadingImage] = useState(false);
     var isProcessing = false;
 
     const { t } = useI18n();
@@ -179,20 +183,36 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
             if (data.isVerificationProcessCompleted && data.isDigitalIdentityVerified) {
                 onNext();
             } else {
-                onNext(t('div_failed'));
+                onNext('0', t('div_failed'));
             }
 
 
         } catch (error) {
-            if (error instanceof Error) {
-                console.log('Error:', error.message);
-                onNext(error.message);
+            var errorMessage = '';
+            var errorCode = -1;
 
+            if (typeof error === 'object' && error !== null) {
+                const { errorCode: code, errorMessage: message } = error as any;
+                if (code !== undefined && message !== undefined) {
+                    errorCode = code;
+                    errorMessage = message;
+                    console.log('API Response Error:', errorCode, errorMessage);
+                } else {
+                    console.log('Unexpected Error:', error);
+                    errorMessage = 'Internet connection error.';
+                }
             } else {
                 console.log('Unexpected Error:', error);
-                console.log('Error during ID back verification:', error);
-                onNext(t('div_failed'));
+                errorMessage = 'Internet connection error.';
             }
+
+            if (errorMessage == '') {
+                errorMessage = t('id_error_msg');
+            }
+
+            setErrorCode(errorCode);
+            setErrorMsg(errorMessage);
+        } finally {
             setIsLoading(false);
         }
 
@@ -357,12 +377,13 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
                 return
             }
 
-            if (currentFaceValueCompressed !== null) {
+            if (currentFaceValueCompressed !== null && isLoadingImage === false) {
 
                 console.log('---> Face Detected:', currentFace);
                 Vibration.vibrate(1000);
                 SoundPlayer.playAsset(require('../assets/sounds/success.mp3'));
 
+                setIsLoadingImage(true);
                 setTimeout(() => {
                     // compress image before save
                     if (stepNumber === 0) {
@@ -383,6 +404,8 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
                         isCamiraActive.current = false;
                         setStepNumber(3);
                     }
+
+                    setIsLoadingImage(false);
 
                     isProcessing = false;
                 }, 3000);
@@ -405,6 +428,20 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
         const result = detectFaces(frame)
         handleFacesDetection(result)
     }, [handleFacesDetection])
+
+    const handleRetryScanning = () => {
+        setErrorMsg('');
+        setErrorCode(-1);
+        setStepNumber(0);
+        face1Value.current = '';
+        face2Value.current = '';
+        face3Value.current = '';
+        isCamiraActive.current = true;
+    };
+
+    const handleExist = () => {
+        onNext(errorCode.toString(), errorMsg);
+    };
 
     // Views
     {/*  Camera Permission Denied View */ }
@@ -464,9 +501,60 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
         );
     }
 
+    {/* Error View */ }
+    if ((errorMsg !== '' || errorCode !== -1) && stepNumber === 3) {
+        return (
+            <View style={styles.loadingContainer}>
+
+                {/* Logo and Title */}
+                <View style={styles.logoContainer}>
+                    <Image
+                        source={require("../assets/vlens_logo_temp.png")}
+                        style={styles.logo}
+                    />
+                    <Text style={styles.title}>{t('scanning_your_id')}</Text>
+                </View>
+
+                {/* Error Illustration */}
+                <View style={styles.scanIllustrationContainer}>
+                    <View style={styles.scanIllustration}>
+                        <Image
+                            source={require('../assets/id_error_final.gif')}
+                            style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }}
+                        />
+                    </View>
+                </View>
+
+                {/* Instructions */}
+                <Text style={styles.instructions}>{errorMsg !== '' ? errorMsg : t('id_error_msg')}</Text>
+
+                {/* Scan ID Button */}
+                <View style={styles.scanButtonContainer}>
+                    <TouchableOpacity style={styles.scanButton} onPress={handleRetryScanning}>
+                        <Text style={styles.scanButtonText}>{t('retry_scanning')}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Exist Button */}
+                <View style={styles.existButtonContainer}>
+                    <TouchableOpacity style={styles.existButton} onPress={handleExist}>
+                        <Text style={styles.existButtonText}>{t('exist')}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Footer */}
+                <View style={styles.footerContainer}>
+                    <Text style={styles.footerText}>{t('powered_by')}</Text>
+                    <Image source={require('../assets/vlens_logo_powered_by_icon.png')} style={styles.footerIcon} />
+                </View>
+
+            </View>
+        );
+    }
+
     {/* Camera View */ }
 
-    if (stepNumber < 3 && face3Value.current === '') {
+    if (stepNumber < 3 && face3Value.current === '' && !isLoadingImage) {
         playSound();
     }
 
@@ -495,12 +583,18 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
 
                 {/* Instruction Overlay */}
                 <View style={styles.overlay}>
-                    <Image source={getCurrentFaceImageSource()} style={styles.InstructionIcon} />
-                    <Text style={styles.instructionText}>
-                        {stepNumber === 0 ? t(face1.current) : ''}
-                        {stepNumber === 1 ? t(face2.current) : ''}
-                        {stepNumber === 2 ? t(face3.current) : ''}
-                    </Text>
+                    {isLoadingImage ? (
+                        <ActivityIndicator color="#FFFFFF" size="large" />
+                    ) : (
+                        <>
+                            <Image source={getCurrentFaceImageSource()} style={styles.InstructionIcon} />
+                            <Text style={styles.instructionText}>
+                                {stepNumber === 0 && t(face1.current)}
+                                {stepNumber === 1 && t(face2.current)}
+                                {stepNumber === 2 && t(face3.current)}
+                            </Text>
+                        </>
+                    )}
                 </View>
 
             </View>
@@ -655,5 +749,49 @@ const styles = StyleSheet.create({
         width: 60,
         height: 20,
         resizeMode: "contain",
+    },
+    scanButtonContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%"
+    },
+    scanButton: {
+        backgroundColor: sdkConfig.colors.primary,
+        paddingVertical: 15,
+        alignItems: "center",
+        paddingHorizontal: 50,
+        borderRadius: 16,
+        marginVertical: 5,
+        marginHorizontal: 20,
+        width: "90%",
+    },
+    scanButtonText: {
+        color: sdkConfig.colors.light,
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    existButtonContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%"
+    },
+    existButton: {
+        backgroundColor: sdkConfig.colors.light,
+        paddingVertical: 15,
+        alignItems: "center",
+        paddingHorizontal: 50,
+        borderRadius: 16,
+        marginVertical: 5,
+        marginHorizontal: 20,
+        width: "90%",
+        borderWidth: 1,
+        borderColor: sdkConfig.colors.primary
+    },
+    existButtonText: {
+        color: sdkConfig.colors.primary,
+        fontSize: 16,
+        fontWeight: "bold",
     }
 });

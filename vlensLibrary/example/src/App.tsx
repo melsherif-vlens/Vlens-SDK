@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 import {
   SafeAreaView,
@@ -15,6 +15,7 @@ import loginApi from './loginApi';
 import generateUUID from './IdGenerator';
 
 import VLensView from 'react-native-vlens';
+import DeviceInfo from 'react-native-device-info';
 
 export default function App() {
 
@@ -28,6 +29,18 @@ export default function App() {
 
   const [isVlensMode, setIsVlensMode] = useState(false);
   const isLivenessOnly = useRef(false);
+
+  const [appVersion, setAppVersion] = useState('');
+
+  useEffect(() => {
+    const fetchVersion = async () => {
+      const version = await DeviceInfo.getVersion(); // e.g., '1.0.2'
+      const buildNumber = await DeviceInfo.getBuildNumber(); // e.g., '5'
+      setAppVersion(`v${version} (${buildNumber})`);
+    };
+
+    fetchVersion();
+  }, []);
 
   const handleSetDefaultData = async () => {
     setLoading(true);
@@ -62,7 +75,8 @@ export default function App() {
     setIsVlensMode(false);
   };
 
-  const onVLensFaild = (error: string) => {
+  const onVLensFaild = (errorCode: string, error: string) => {
+    console.error('[APP_LOG]VLens validation failed:', errorCode, error);
     Alert.alert('Error', 'Validation failed with error: ' + error);
     setIsVlensMode(false);
   };
@@ -137,6 +151,8 @@ export default function App() {
           </TouchableOpacity>
         </>
       )}
+
+      <Text style={styles.versionLabel}>{appVersion}</Text>
     </SafeAreaView>
   );
 }
@@ -158,6 +174,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
     color: '#204061'
+  },
+  versionLabel: {
+    fontSize: 14,
+    marginTop: 25,
+    color: '#204061',
+    width: '100%',
+    textAlign: 'center',
   },
   trxIdInput: {
     height: 40,

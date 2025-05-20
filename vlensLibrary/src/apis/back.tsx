@@ -1,6 +1,6 @@
 import API from './api';
 import { sdkConfig } from '../appConfig';
-import { handleApiError } from './ApiError';
+import { checkIfThereIsError } from './ApiError';
 
 const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
     const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/back';
@@ -14,26 +14,22 @@ const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
 
     console.log('Request Body:', requestBody);
 
-    try {
-        const response = await API.post(url, requestBody);
-        console.log('Response:', response.data);
-        
-        // Extracting relevant data from the response
-        const { error_code } = response.data || {};
-        if (error_code) {
-            throw handleApiError(response.data);
-        }
-
-        const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};
-
-        console.log('Verification Completed:', isVerificationProcessCompleted);
-        console.log('Digital Identity Verified:', isDigitalIdentityVerified);
-
-        return { isVerificationProcessCompleted, isDigitalIdentityVerified };
-    } catch (error) {
-        throw handleApiError(error);
-       
+    const response = await API.post(url, requestBody);
+    console.log('Response:', response.data);
+    
+    const {errorCode, errorMessage} = checkIfThereIsError(response);
+    if (errorCode != -1) {
+        console.error('API Error:', errorCode, errorMessage);
+        throw { errorCode, errorMessage };
     }
+
+    const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};
+
+    console.log('Verification Completed:', isVerificationProcessCompleted);
+    console.log('Digital Identity Verified:', isDigitalIdentityVerified);
+
+    return { isVerificationProcessCompleted, isDigitalIdentityVerified };
+
 };
 
 export default verifyIdBackApi;

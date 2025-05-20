@@ -37,6 +37,30 @@ export const handleApiError = (error: any) => {
     }
 }
 
+export const checkIfThereIsError = (response: any): { errorCode: number; errorMessage: string } => {
+    let errorCode = -1;
+    let errorMessage = '';
+
+    if (response?.error_code) {
+        errorCode = response.error_code;
+        errorMessage = getApiError(errorCode);
+    }
+
+    // Check for validation errors
+    const validationErrors = response.data?.services?.Validations?.validation_errors || [];
+    console.log('Validation Errors:', validationErrors);
+    if (validationErrors.length > 0) {
+        const firstError = validationErrors[0]?.errors?.[0];
+        errorCode = firstError?.code || -1;
+        errorMessage = firstError?.message || 'Unknown error';
+    }
+
+    console.log('Error Code:', errorCode);
+    console.log('Error Message:', errorMessage);
+
+    return { errorCode, errorMessage };
+}
+
 
 export const defaultApiErrors: ApiError[] = [
     {

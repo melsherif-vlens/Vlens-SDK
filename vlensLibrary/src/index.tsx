@@ -37,16 +37,16 @@ const VLensView = (props: VLensViewProps) => {
     }, []);
 
     // Callbacks
-    const onNext = (error?: string) => {
+    const onNext = (errorCode?: string, error?: string) => {
 
         // Handle Next Steps In Error Case
-        if (error) {
+        if (errorCode) {
             console.log('VLensView in', step, ' with error:', error);
             // if (step === 'face' && numberOfLivenessRetries.current < 2) {
             //     numberOfLivenessRetries.current += 1;
             //     setStep('face');
             // }
-            props.onFaild(error);
+            props.onFaild(errorCode, error || 'Unknown Msg');
             return;
         }
 
@@ -80,7 +80,7 @@ const VLensView = (props: VLensViewProps) => {
         console.log(`VLensView handle prev step on ${step} step`);
 
         if (step === 'startNationalId') {
-            props.onFaild('User cancelled the process');
+            props.onFaild('-1', 'User cancelled the process');
             return;
         }
 
@@ -91,7 +91,7 @@ const VLensView = (props: VLensViewProps) => {
 
         if (step === 'startFace') {
             if (props.isLivenessOnly) {
-                props.onFaild('User cancelled the process');
+                props.onFaild('-1', 'User cancelled the process');
             } else {
                 setStep('startNationalId');
             }

@@ -12,7 +12,7 @@ const verifyIdFrontApi = async (transactionId: string, imageBase64: string) => {
 
   try {
     const response = await API.post(url, requestBody);
-    console.log('Response:', response.data);
+    console.log('Front Response:', response.data);
     
     // Extracting relevant data from the response
     const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};

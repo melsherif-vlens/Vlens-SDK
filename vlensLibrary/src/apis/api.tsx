@@ -3,7 +3,7 @@ import { sdkConfig } from '../appConfig';
 
 const API = axios.create({
   baseURL: sdkConfig.env.apiBaseUrl,
-  timeout: 10000, // Timeout in milliseconds
+  timeout: 120000, // Timeout in milliseconds
 });
 
 
