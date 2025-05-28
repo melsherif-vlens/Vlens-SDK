@@ -9,7 +9,8 @@ const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
 
     const requestBody = {
         transaction_id: transactionId,
-        image: imageBase64
+        image: imageBase64,
+        getExtractedData: true 
     };
 
     console.log('Request Body:', requestBody);

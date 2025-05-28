@@ -293,7 +293,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
             const leftEyeOpenProbability = face.leftEyeOpenProbability;
             const rightEyeOpenProbability = face.rightEyeOpenProbability;
             const yawAngle = face.yawAngle;
-            const adjustedYawAngle = -yawAngle; // as we are using front camera
+            const adjustedYawAngle = yawAngle; // as we are using front camera
             const smilingProbability = face.smilingProbability;
 
             console.log('Face Detected with:', leftEyeOpenProbability, rightEyeOpenProbability, yawAngle, smilingProbability);
