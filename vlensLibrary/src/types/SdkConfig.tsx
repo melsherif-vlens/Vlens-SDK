@@ -1,3 +1,5 @@
+import type { Data } from "../apis/payload/VerifyIdBackApi";
+
 export interface EnvironmentConfig{
     apiBaseUrl: string;
     accessToken: string;
@@ -35,6 +37,7 @@ export type SdkConfig = {
     defaultLocale: string;
     colors: ColorConfig;
     errorMessages: ApiError[];
-    onSuccess: () => void;
+    userData?: Data;
+    onSuccess: (data: Data | undefined) => void;
     onFaild: (code: string, error: string) => void;
 };

@@ -22,6 +22,7 @@ export const sdkConfig: SdkConfig = {
         light: '#FFFFFF',
     },
     errorMessages: defaultApiErrors,
+    userData: undefined,
     onSuccess: () => { },
     onFaild: (error: string) => { console.error(`onFaild callback no implemented - error is ${error}`); },
 };

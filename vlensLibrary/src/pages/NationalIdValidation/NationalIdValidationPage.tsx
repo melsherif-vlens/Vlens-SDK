@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
-import RNFS from 'react-native-fs';
-import { StyleSheet, View, TouchableOpacity, Text, Alert, Dimensions, Image } from 'react-native';
+// import RNFS from 'react-native-fs';
+import { StyleSheet, View, TouchableOpacity, Text, Dimensions, Image } from 'react-native';
 import { Camera, useCameraDevice } from 'react-native-vision-camera';
 
-import verifyIdFrontApi from '../apis/front';
-import verifyIdBackApi from '../apis/back';
-import compressBase64Image from '../utilities/compressBase64Image';
+import verifyIdFrontApi from '../../apis/front';
+import verifyIdBackApi from '../../apis/back';
+import compressBase64Image from '../../utilities/compressBase64Image';
 
-import { useI18n } from '../localization/useI18n';
-import { sdkConfig } from '../appConfig';
+import { useI18n } from '../../localization/useI18n';
+import { sdkConfig } from '../../appConfig';
+import NationalIdValidationLoadingView from './NationalIdValidationLoadingView';
+import NationalIdValidationErrorView from './NationalIdValidationErrorView';
+import CameraOverlayView from './CameraOverlayView';
+import NationalIdFrontValidationCameraView from './NationalIdFrontValidationCameraView';
+import NationalIdBackValidationCameraView from './NationalIdBackValidationCameraView';
 
 
 const { width } = Dimensions.get('window');
@@ -24,7 +29,7 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
 
     const device = useCameraDevice('back');
     const [cameraPermission, setCameraPermission] = useState(false);
-    const [cameraRef, setCameraRef] = useState<Camera | null>(null);
+    // const [cameraRef, setCameraRef] = useState<Camera | null>(null);
     const [flash, setFlash] = useState(false);
 
     const [step, setStep] = useState<'front' | 'flip' | 'back'>('front');
@@ -41,7 +46,7 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
             handleApiResponse();
         }
     }, [didPostFrontImage, didPostBackImage]);
-    
+
 
     const { t } = useI18n();
 
@@ -99,7 +104,8 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
         const transactionId = sdkConfig?.transactionId;
 
         try {
-            await verifyIdBackApi(transactionId, base64Compressed);
+            var data = await verifyIdBackApi(transactionId, base64Compressed);
+            sdkConfig.userData = data;
         } catch (error) {
             var errorMessage = '';
             var errorCode = -1;
@@ -149,78 +155,44 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
     }
 
     // Camera Functions
-    const captureImage = async () => {
-        if (!cameraRef) return;
+    // const captureImage = async () => {
+    //     if (!cameraRef) return;
 
-        try {
-            const photo = await cameraRef.takePhoto({ enableShutterSound: true }); // TODO: Add options with image quality 
-            const base64 = await RNFS.readFile(photo.path, 'base64');
+    //     try {
+    //         const photo = await cameraRef.takePhoto({ enableShutterSound: true }); // TODO: Add options with image quality 
+    //         const base64 = await RNFS.readFile(photo.path, 'base64');
 
-            if (step === 'front') {
-                // Alert.alert(t('success'), t('front_image_captured'));
-                setStep('flip');
-                postFrontImage(base64);
+    //         didGetImage(base64);
 
-                setTimeout(() => {
-                    setStep('back');
-                }, 2000);
+    //     } catch (error) {
+    //         console.log('Capture Error:', error);
+    //         Alert.alert(t('Error'), t('faild_to_capture_image'));
+    //     }
+    // };
 
-                // clearTimeout(timeout); // Not needed
+    const didGetImage = (base64: string) => {
+        if (step === 'front') {
+            console.log('Front Image Callback');
+            // Alert.alert(t('success'), t('front_image_captured'));
+            setStep('flip');
+            postFrontImage(base64);
 
-            } else if (step === 'back') {
-                // Alert.alert(t('success'), t('back_image_captured'));
-                postBackImage(base64);
-            }
-        } catch (error) {
-            console.log('Capture Error:', error);
-            Alert.alert(t('Error'), t('faild_to_capture_image'));
+            setTimeout(() => {
+                setStep('back');
+            }, 2000);
+
+            // clearTimeout(timeout); // Not needed
+
+        } else if (step === 'back') {
+            console.log('Back Image Callback');
+            // Alert.alert(t('success'), t('back_image_captured'));
+            postBackImage(base64);
         }
-    };
+    }
 
     const toggleFlash = () => {
         console.log('Flash toggled');
         setFlash(!flash);
-    };
-
-    const getCameraOverlayView = () => {
-
-        if (step === 'flip') {
-            return (
-                <View style={styles.overlay}>
-                    <Image
-                        source={require('../assets/id_flip.gif')}
-                        style={styles.cardOutlineImage}
-                    />
-                    <Text style={styles.instructionText}>
-                        {t('id_flip_msg')}
-                    </Text>
-                </View>
-            );
-        } else if (step === 'back') {
-            return (
-                <View style={styles.overlay}>
-                    <Image
-                        source={require('../assets/scanning_natioanl_id_back_vector.png')}
-                        style={styles.cardOutlineImage}
-                    />
-                    <Text style={styles.instructionText}>
-                        {t('align_id_back_side_msg')}
-                    </Text>
-                </View>
-            );
-        };
-
-        return (
-            <View style={styles.overlay}>
-                <Image
-                    source={require('../assets/scanning_natioanl_id_front_vector.png')}
-                    style={styles.cardOutlineImage}
-                />
-                <Text style={styles.instructionText}>
-                    {t('align_id_front_side_msg')}
-                </Text>
-            </View>
-        );
     };
 
     const handleRetryScanning = () => {
@@ -257,88 +229,18 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
     {/* Loading View */ }
     if (isLoading) {
         return (
-            <View style={styles.loadingContainer}>
-
-                {/* Logo and Title */}
-                <View style={styles.logoContainer}>
-                    <Image
-                        source={require("../assets/vlens_logo_temp.png")}
-                        style={styles.logo}
-                    />
-                    <Text style={styles.title}>{t('scanning_your_id')}</Text>
-                </View>
-
-                {/* Scanning Illustration */}
-                <View style={styles.scanIllustrationContainer}>
-                    <View style={styles.scanIllustration}>
-                        <Image
-                            source={require('../assets/scan_id_final.gif')}
-                            style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }}
-                        />
-                    </View>
-                </View>
-
-                {/* Instructions */}
-                <Text style={styles.instructions}>{t('processing_your_id')}</Text>
-
-                {/* Footer */}
-                <View style={styles.footerContainer}>
-                    <Text style={styles.footerText}>{t('powered_by')}</Text>
-                    <Image source={require('../assets/vlens_logo_powered_by_icon.png')} style={styles.footerIcon} />
-                </View>
-
-            </View>
+            <NationalIdValidationLoadingView />
         );
     }
 
     {/* Error View */ }
     if ((errorMsg !== '' || errorCode !== -1) && didPostBackImage === true && didPostFrontImage === true) {
         return (
-            <View style={styles.loadingContainer}>
-
-                {/* Logo and Title */}
-                <View style={styles.logoContainer}>
-                    <Image
-                        source={require("../assets/vlens_logo_temp.png")}
-                        style={styles.logo}
-                    />
-                    <Text style={styles.title}>{t('scanning_your_id')}</Text>
-                </View>
-
-                {/* Error Illustration */}
-                <View style={styles.scanIllustrationContainer}>
-                    <View style={styles.scanIllustration}>
-                        <Image
-                            source={require('../assets/id_error_final.gif')}
-                            style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }}
-                        />
-                    </View>
-                </View>
-
-                {/* Instructions */}
-                <Text style={styles.instructions}>{errorMsg !== '' ? errorMsg : t('id_error_msg')}</Text>
-
-                {/* Scan ID Button */}
-                <View style={styles.scanButtonContainer}>
-                    <TouchableOpacity style={styles.scanButton} onPress={handleRetryScanning}>
-                        <Text style={styles.scanButtonText}>{t('retry_scanning')}</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Exist Button */}
-                <View style={styles.existButtonContainer}>
-                    <TouchableOpacity style={styles.existButton} onPress={handleExist}>
-                        <Text style={styles.existButtonText}>{t('exist')}</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Footer */}
-                <View style={styles.footerContainer}>
-                    <Text style={styles.footerText}>{t('powered_by')}</Text>
-                    <Image source={require('../assets/vlens_logo_powered_by_icon.png')} style={styles.footerIcon} />
-                </View>
-
-            </View>
+            <NationalIdValidationErrorView
+                errorMsg={errorMsg}
+                handleRetryScanning={handleRetryScanning}
+                handleExist={handleExist}
+            />
         );
     }
 
@@ -349,12 +251,12 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={onPrev}>
-                    <Image source={require('../assets/arrow_left.png')} style={styles.headerIcon} />
+                    <Image source={require('../../assets/arrow_left.png')} style={styles.headerIcon} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>{t('camera')}</Text>
                 <TouchableOpacity onPress={toggleFlash}>
                     <Image
-                        source={flash === false ? require('../assets/flash_turn_on_icon.png') : require('../assets/flash_turn_off_icon.png')}
+                        source={flash === false ? require('../../assets/flash_turn_on_icon.png') : require('../../assets/flash_turn_off_icon.png')}
                         style={styles.headerIcon}
                     />
                 </TouchableOpacity>
@@ -362,27 +264,25 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
 
             <View style={styles.cameraContainer}>
                 {/* Camera View */}
-                <Camera
-                    ref={(ref) => setCameraRef(ref)}
-                    style={styles.camera}
-                    device={device}
-                    isActive={true}
-                    photo={true}
-                    torch={flash == true ? 'on' : 'off'}
-                />
+
+                {step === 'front' ?
+                    <NationalIdFrontValidationCameraView callback={didGetImage} />
+                    :
+                    <NationalIdBackValidationCameraView callback={didGetImage} />
+                }
 
                 {/* Card Overlay */}
-                {getCameraOverlayView()}
+                <CameraOverlayView step={step} />
             </View>
 
             {/* Capture Button */}
-            <View style={styles.footer}>
+            {/* <View style={styles.footer}>
                 {step !== 'flip' ?
                     <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
                         <View style={styles.captureCircle} />
                     </TouchableOpacity>
                     : null}
-            </View>
+            </View> */}
         </View>
     );
 }

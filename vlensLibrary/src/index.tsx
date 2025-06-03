@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { sdkConfig } from './appConfig';
 
 import StartNationalIdValidationPage from './pages/StartNationalIdValidationPage';
-import NationalIdValidationPage from './pages/NationalIdValidationPage';
+import NationalIdValidationPage from './pages/NationalIdValidation/NationalIdValidationPage';
 
 import StartFaceValidationPage from './pages/StartFaceValidationPage';
 import FaceValidationPage from './pages/FaceValidationPage';
@@ -60,7 +60,7 @@ const VLensView = (props: VLensViewProps) => {
 
         if (step === 'nationalId') {
             if (props.isNationalIdOnly) {
-                props.onSuccess();
+                props.onSuccess(sdkConfig.userData);
             } else {
                 setStep('startFace');
             }
@@ -72,7 +72,7 @@ const VLensView = (props: VLensViewProps) => {
             return;
         }
 
-        props.onSuccess();
+        props.onSuccess(sdkConfig.userData);
     }
 
     const onPrev = () => {

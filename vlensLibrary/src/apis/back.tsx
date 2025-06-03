@@ -29,7 +29,7 @@ const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
     console.log('Verification Completed:', isVerificationProcessCompleted);
     console.log('Digital Identity Verified:', isDigitalIdentityVerified);
 
-    return { isVerificationProcessCompleted, isDigitalIdentityVerified };
+    return response.data?.data;
 
 };
 

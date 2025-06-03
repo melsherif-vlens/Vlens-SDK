@@ -16,6 +16,7 @@ import generateUUID from './IdGenerator';
 
 import VLensView from 'react-native-vlens';
 import DeviceInfo from 'react-native-device-info';
+import type { Data } from '../../src/apis/payload/VerifyIdBackApi';
 
 export default function App() {
 
@@ -70,7 +71,8 @@ export default function App() {
     setIsVlensMode(true);
   };
 
-  const onVLensSuccess = () => {
+  const onVLensSuccess = (data?: Data) => {
+    console.log('[APP_LOG]VLens validation success WITH DATA:', data);
     Alert.alert('Success', 'Validation done successfully!');
     setIsVlensMode(false);
   };
