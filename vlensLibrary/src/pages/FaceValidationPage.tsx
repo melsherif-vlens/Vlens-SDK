@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import RNFS from 'react-native-fs';
-import { StyleSheet, View, Text, Image, TouchableOpacity, Platform, Vibration, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, Platform, Vibration, ActivityIndicator, Dimensions } from 'react-native';
 import { Camera, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera';
 import { useFaceDetector } from 'react-native-vision-camera-face-detector'
 import type { Face, FaceDetectionOptions } from 'react-native-vision-camera-face-detector'
@@ -13,6 +13,7 @@ import { useI18n } from '../localization/useI18n';
 import { sdkConfig } from '../appConfig';
 import SoundPlayer from 'react-native-sound-player'
 
+const { height } = Dimensions.get('window');
 
 type FaceValidationPageProps = {
     onNext: (errorCode?: string, error?: string) => void;
@@ -293,7 +294,11 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
             const leftEyeOpenProbability = face.leftEyeOpenProbability;
             const rightEyeOpenProbability = face.rightEyeOpenProbability;
             const yawAngle = face.yawAngle;
-            const adjustedYawAngle = yawAngle; // as we are using front camera
+            var adjustedYawAngle = yawAngle * -1; // as we are using front camera
+            // if (__DEV__) { 
+            //     adjustedYawAngle = yawAngle * -1; // Adjust yaw angle for front camera in development mode
+            // }
+            
             const smilingProbability = face.smilingProbability;
 
             console.log('Face Detected with:', leftEyeOpenProbability, rightEyeOpenProbability, yawAngle, smilingProbability);
@@ -512,14 +517,14 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
                         source={require("../assets/vlens_logo_temp.png")}
                         style={styles.logo}
                     />
-                    <Text style={styles.title}>{t('scanning_your_id')}</Text>
+                    <Text style={styles.title}>{t('verify_your_face')}</Text>
                 </View>
 
                 {/* Error Illustration */}
                 <View style={styles.scanIllustrationContainer}>
                     <View style={styles.scanIllustration}>
                         <Image
-                            source={require('../assets/id_error_final.gif')}
+                            source={require('../assets/person_error_final.gif')}
                             style={{ width: 200, height: 100, alignSelf: 'center', resizeMode: 'contain', margin: 20 }}
                         />
                     </View>
@@ -646,6 +651,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
+        height: height - 80, // Adjust height to fit header
+        overflow: 'hidden',
     },
     overlay: {
         position: 'absolute',

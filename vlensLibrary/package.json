@@ -199,6 +199,7 @@
     "version": "0.45.5"
   },
   "dependencies": {
+    "@mgcrea/vision-camera-barcode-scanner": "^0.12.1",
     "axios": "^1.7.9",
     "i18n-js": "latest",
     "i18next": "^24.2.0",
@@ -209,6 +210,7 @@
     "react-native-sound-player": "^0.14.3",
     "react-native-vision-camera": "^4.6.3",
     "react-native-vision-camera-face-detector": "^1.7.2",
+    "react-native-vision-camera-text-detector": "^1.0.5",
     "react-native-worklets-core": "^1.5.0"
   }
 }

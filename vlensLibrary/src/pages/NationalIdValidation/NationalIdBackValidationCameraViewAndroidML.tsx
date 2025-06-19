@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import RNFS from 'react-native-fs';
 import { StyleSheet, View, Text, Platform } from 'react-native';
 import compressBase64Image from '../../utilities/compressBase64Image';
@@ -6,41 +6,42 @@ import { useI18n } from '../../localization/useI18n';
 import {
     Camera,
     useCameraDevice,
-    useCodeScanner,
+    useFrameProcessor,
 } from 'react-native-vision-camera';
 
-type NationalIdBackValidationCameraViewProps = {
+import { detectText } from 'react-native-vision-camera-text-detector';
+import { Worklets } from 'react-native-worklets-core'
+
+type NationalIdBackValidationCameraViewAndroidProps = {
     callback: (imageInBase64: string) => void;
 };
 
-export default function NationalIdBackValidationCameraView({ callback }: NationalIdBackValidationCameraViewProps) {
+export default function NationalIdBackValidationCameraViewAndroid({ callback }: NationalIdBackValidationCameraViewAndroidProps) {
 
-    const [isActive, setIsActive] = useState(true);
     const device = useCameraDevice('back');
     const isCamiraActive = useRef(true);
-    const hasHandledScan = useRef(false);
 
-    const [cameraPermission, setCameraPermission] = useState(false);
+    // const [cameraPermission, setCameraPermission] = useState(false);
     const [cameraRef, setCameraRef] = useState<Camera | null>(null);
 
     const { t } = useI18n();
 
     // Request Camera Permission
-    useEffect(() => {
-        console.log('requestPermission');
-        const requestPermission = async () => {
-            const status = await Camera.requestCameraPermission();
-            setCameraPermission(status === 'granted');
-        };
-        requestPermission();
-    }, []);
+    // useEffect(() => {
+    //     console.log('requestPermission');
+    //     const requestPermission = async () => {
+    //         const status = await Camera.requestCameraPermission();
+    //         setCameraPermission(status === 'granted');
+    //     };
+    //     requestPermission();
+    // }, []);
 
 
     const getBase64ImageFromCamera = async () => {
 
         if (!cameraRef) return;
         if (!isCamiraActive.current && Platform.OS !== 'ios') return;
-        
+
         try {
             const photo = await cameraRef?.takePhoto({
                 enableShutterSound: false,
@@ -58,23 +59,23 @@ export default function NationalIdBackValidationCameraView({ callback }: Nationa
 
     }
 
-    // Code scanner configuration for PDF417
-    const codeScanner = useCodeScanner({
-        codeTypes: ['pdf-417'],
-        onCodeScanned: (codes) => {
-            console.log('Codes detected:', codes);
+    // // Code scanner configuration for PDF417
+    // const codeScanner = useCodeScanner({
+    //     codeTypes: ['pdf-417'],
+    //     onCodeScanned: (codes) => {
+    //         console.log('Codes detected:', codes);
 
-            if (codes.length > 0 && isActive && !hasHandledScan.current) {
-                hasHandledScan.current = true;
-                handleCodeScanned();
-                // Pause scanning after detection
-                isCamiraActive.current = false;
-                setIsActive(false);
-            }
-        },
-    });
+    //         if (codes.length > 0 && isActive && !hasHandledScan.current) {
+    //             hasHandledScan.current = true;
+    //             handleCodeScanned();
+    //             // Pause scanning after detection
+    //             isCamiraActive.current = false;
+    //             setIsActive(false);
+    //         }
+    //     },
+    // });
 
-    const handleCodeScanned = async () => {
+    const handleCodeScanned = Worklets.createRunOnJS(async () => {
         const imageInBase64 = await getBase64ImageFromCamera();
         if (!imageInBase64) {
             console.warn('No image captured from camera.');
@@ -85,18 +86,31 @@ export default function NationalIdBackValidationCameraView({ callback }: Nationa
         // Call the callback with the compressed image
         callback(compressedImage);
         // Pause scanning after detection
-    };
+    });
 
 
     // Views
     {/*  Camera Permission Denied View */ }
-    if (!cameraPermission) {
-        return (
-            <View style={styles.container}>
-                <Text>{t('camera_permission_msg')}</Text>
-            </View>
-        );
-    }
+    // if (!cameraPermission) {
+    //     return (
+    //         <View style={styles.container}>
+    //             <Text>{t('camera_permission_msg')}</Text>
+    //         </View>
+    //     );
+    // }
+
+
+    const frameProcessor = useFrameProcessor(async (frame) => {
+        'worklet';
+        // console.log('Processing frame for text detection...');
+        const data = detectText(frame);
+        const { text } = data || {};
+        console.log('Detected text:', text);
+        if (text != undefined && text !== '') {
+            console.log('Text detected');
+            handleCodeScanned();
+        }
+    }, [handleCodeScanned]);
 
     {/*  Camera Not Found View */ }
     if (!device) {
@@ -114,8 +128,8 @@ export default function NationalIdBackValidationCameraView({ callback }: Nationa
                 style={styles.camera}
                 photo={true}
                 device={device}
-                isActive={isActive}
-                codeScanner={isActive ? codeScanner : undefined}
+                isActive={true}
+                frameProcessor={frameProcessor}
                 onError={(error) => {
                     console.error('Camera error:', error);
                 }}

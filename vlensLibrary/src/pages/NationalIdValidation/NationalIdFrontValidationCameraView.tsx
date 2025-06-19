@@ -20,10 +20,10 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
     const faceDetectionOptions = useRef<FaceDetectionOptions>({
         // detection options
         landmarkMode: "none",
-        performanceMode: "accurate",
-        classificationMode: "all",
-        trackingEnabled: true,
-        contourMode: "all",
+        performanceMode: "fast",
+        classificationMode: "none",
+        trackingEnabled: false,
+        contourMode: "none",
         // convertFrame: true
     }).current
 
@@ -79,6 +79,7 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
     const handleFacesDetection = Worklets.createRunOnJS(async (
         faces: Face[]
     ) => {
+
         if (Array.isArray(faces) && faces.length !== 0) {
             try {
                 const currentFaceValue = await getBase64ImageFromCamera();
@@ -108,6 +109,7 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
 
     const frameProcessor = useFrameProcessor((frame) => {
         'worklet'
+        console.log('Processing frame for face detection...');
         const result = detectFaces(frame)
         handleFacesDetection(result)
     }, [handleFacesDetection])
@@ -132,6 +134,8 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
         );
     }
 
+    console.log('Starting Camera to detect front side of National ID');
+
     return (
         <View style={styles.container}>
             <Camera
@@ -152,7 +156,6 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         height: '100%',
-        backgroundColor: '#000',
     },
     camera: {
         flex: 1,

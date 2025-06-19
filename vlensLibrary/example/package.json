@@ -22,6 +22,7 @@
     "react-native-sound-player": "^0.14.3",
     "react-native-vision-camera": "^4.6.3",
     "react-native-vision-camera-face-detector": "^1.7.2",
+    "react-native-vision-camera-text-detector": "^1.0.5",
     "react-native-web": "~0.19.13",
     "react-native-worklets-core": "^1.5.0"
   },

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from "react-native";
 
 import { sdkConfig } from "../appConfig";
 import { useI18n } from '../localization/useI18n';
@@ -82,14 +82,14 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     header: {
-        height: 100,
+        height: 80,
         alignSelf: 'stretch',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 10,
-        paddingTop: 50,
+        paddingTop: Platform.OS === 'ios' ? 50 : 10,
     },
     headerIcon: {
         width: 30,
@@ -99,13 +99,11 @@ const styles = StyleSheet.create({
     },
     logoContainer: {
         alignItems: "center",
-        margin: 20,
     },
     logo: {
         width: 150,
-        height: 100,
+        height: 60,
         resizeMode: "contain",
-        marginTop: 40,
     },
     title: {
         fontSize: 28,

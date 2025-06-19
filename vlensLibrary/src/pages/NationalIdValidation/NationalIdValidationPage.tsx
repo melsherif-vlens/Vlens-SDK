@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 // import RNFS from 'react-native-fs';
-import { StyleSheet, View, TouchableOpacity, Text, Dimensions, Image } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, Dimensions, Image, Platform } from 'react-native';
 import { Camera, useCameraDevice } from 'react-native-vision-camera';
 
 import verifyIdFrontApi from '../../apis/front';
@@ -13,10 +13,11 @@ import NationalIdValidationLoadingView from './NationalIdValidationLoadingView';
 import NationalIdValidationErrorView from './NationalIdValidationErrorView';
 import CameraOverlayView from './CameraOverlayView';
 import NationalIdFrontValidationCameraView from './NationalIdFrontValidationCameraView';
+import NationalIdBackValidationCameraViewAndroid from './NationalIdBackValidationCameraViewAndroidML';
 import NationalIdBackValidationCameraView from './NationalIdBackValidationCameraView';
 
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const cardWidth = width;
 const cardHeight = cardWidth * 0.6;
 
@@ -265,11 +266,15 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
             <View style={styles.cameraContainer}>
                 {/* Camera View */}
 
-                {step === 'front' ?
+                {step === 'front' ? (
                     <NationalIdFrontValidationCameraView callback={didGetImage} />
-                    :
-                    <NationalIdBackValidationCameraView callback={didGetImage} />
-                }
+                ) : (
+                    Platform.OS === 'android' ? (
+                        <NationalIdBackValidationCameraViewAndroid callback={didGetImage} />
+                    ) : (
+                        <NationalIdBackValidationCameraView callback={didGetImage} />
+                    )
+                )}
 
                 {/* Card Overlay */}
                 <CameraOverlayView step={step} />
@@ -295,7 +300,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     header: {
-        height: 120,
+        height: 80,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -315,8 +320,9 @@ const styles = StyleSheet.create({
         resizeMode: 'contain'
     },
     cameraContainer: {
-        flex: 1,
-        position: 'relative'
+        height: height - 80, // Adjust height to fit header
+        position: 'relative',
+        overflow: 'hidden',
     },
     camera: {
         flex: 1,
