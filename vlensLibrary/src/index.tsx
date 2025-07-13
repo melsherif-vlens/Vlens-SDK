@@ -28,6 +28,7 @@ const VLensView = (props: VLensViewProps) => {
         sdkConfig.env = props.env;
         sdkConfig.defaultLocale = props.defaultLocale;
         sdkConfig.colors = props.colors;
+        sdkConfig.numberOfRetries = Math.min(props.numberOfRetries || 3, 3);
 
         console.log('VLensView Config:', sdkConfig);
 

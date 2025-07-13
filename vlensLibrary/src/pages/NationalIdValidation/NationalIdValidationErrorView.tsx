@@ -5,11 +5,12 @@ import { sdkConfig } from '../../appConfig';
 
 type NationalIdValidationErrorViewProps = {
     errorMsg: string;
+    isAllowedToRetry: boolean;
     handleRetryScanning: () => void;
     handleExist: () => void;
 }
 
-export default function NationalIdValidationErrorView({errorMsg, handleRetryScanning, handleExist}: NationalIdValidationErrorViewProps) {
+export default function NationalIdValidationErrorView({errorMsg, isAllowedToRetry, handleRetryScanning, handleExist}: NationalIdValidationErrorViewProps) {
     const { t } = useI18n();
 
     return (
@@ -37,12 +38,14 @@ export default function NationalIdValidationErrorView({errorMsg, handleRetryScan
             {/* Instructions */}
             <Text style={styles.instructions}>{errorMsg !== '' ? errorMsg : t('id_error_msg')}</Text>
 
-            {/* Scan ID Button */}
-            <View style={styles.scanButtonContainer}>
-                <TouchableOpacity style={styles.scanButton} onPress={handleRetryScanning}>
-                    <Text style={styles.scanButtonText}>{t('retry_scanning')}</Text>
-                </TouchableOpacity>
-            </View>
+            {/* Retry Button */}
+            {isAllowedToRetry && (
+                <View style={styles.scanButtonContainer}>
+                    <TouchableOpacity style={styles.scanButton} onPress={handleRetryScanning}>
+                        <Text style={styles.scanButtonText}>{t('retry_scanning')}</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
 
             {/* Exist Button */}
             <View style={styles.existButtonContainer}>

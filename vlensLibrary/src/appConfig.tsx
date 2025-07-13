@@ -5,12 +5,13 @@ export const sdkConfig: SdkConfig = {
     transactionId: '',
     isLivenessOnly: false,
     isNationalIdOnly: false,
+    numberOfRetries: 3,
     env: {
         apiBaseUrl: 'https://api.vlenseg.com',
         accessToken: '',
         refreshToken: '',
         apiKey: '',
-        tenancyName: '',
+        tenancyName: ''
     },
     defaultLocale: 'en',
     colors: {

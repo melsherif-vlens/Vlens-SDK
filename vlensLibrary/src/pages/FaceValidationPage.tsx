@@ -47,12 +47,14 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
 
     const [errorMsg, setErrorMsg] = useState('');
     const [errorCode, setErrorCode] = useState(-1);
-    
+
     const isCamiraActive = useRef(true);
 
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingImage, setIsLoadingImage] = useState(false);
     var isProcessing = false;
+
+    const [numberOfRetries, setNumberOfRetries] = useState(1);
 
     const { t } = useI18n();
 
@@ -298,7 +300,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
             // if (__DEV__) { 
             //     adjustedYawAngle = yawAngle * -1; // Adjust yaw angle for front camera in development mode
             // }
-            
+
             const smilingProbability = face.smilingProbability;
 
             console.log('Face Detected with:', leftEyeOpenProbability, rightEyeOpenProbability, yawAngle, smilingProbability);
@@ -435,6 +437,8 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
     }, [handleFacesDetection])
 
     const handleRetryScanning = () => {
+        console.log('Retry Scanning');
+        setNumberOfRetries(numberOfRetries + 1);
         setErrorMsg('');
         setErrorCode(-1);
         setStepNumber(0);
@@ -534,11 +538,13 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
                 <Text style={styles.instructions}>{errorMsg !== '' ? errorMsg : t('id_error_msg')}</Text>
 
                 {/* Scan ID Button */}
-                <View style={styles.scanButtonContainer}>
-                    <TouchableOpacity style={styles.scanButton} onPress={handleRetryScanning}>
-                        <Text style={styles.scanButtonText}>{t('retry_scanning')}</Text>
-                    </TouchableOpacity>
-                </View>
+                {numberOfRetries < sdkConfig.numberOfRetries && (
+                    <View style={styles.scanButtonContainer}>
+                        <TouchableOpacity style={styles.scanButton} onPress={handleRetryScanning}>
+                            <Text style={styles.scanButtonText}>{t('retry_scanning')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
                 {/* Exist Button */}
                 <View style={styles.existButtonContainer}>
@@ -589,7 +595,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
                 {/* Instruction Overlay */}
                 <View style={styles.overlay}>
                     {isLoadingImage ? (
-                        <ActivityIndicator color="#FFFFFF" size="large" />
+                        <ActivityIndicator color="#FFFFFF" size="large" style={styles.InstructionIcon} />
                     ) : (
                         <>
                             <Image source={getCurrentFaceImageSource()} style={styles.InstructionIcon} />

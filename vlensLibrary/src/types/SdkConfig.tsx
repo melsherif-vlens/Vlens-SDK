@@ -33,6 +33,7 @@ export type SdkConfig = {
     transactionId: string;
     isLivenessOnly: boolean;
     isNationalIdOnly: boolean;
+    numberOfRetries: number;
     env: EnvironmentConfig;
     defaultLocale: string;
     colors: ColorConfig;
