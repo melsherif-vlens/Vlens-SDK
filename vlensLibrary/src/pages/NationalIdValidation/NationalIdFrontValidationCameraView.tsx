@@ -12,6 +12,10 @@ type NationalIdFrontValidationCameraViewProps = {
     callback: (imageInBase64: string) => void;
 };
 
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default function NationalIdFrontValidationCameraView({ callback }: NationalIdFrontValidationCameraViewProps) {
 
     const isCameraActive = useRef(true);
@@ -53,6 +57,10 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
         console.log('getBase64ImageFromCamera called');
         if (!cameraRef) return;
         if (!isCameraActive.current) return;
+
+        // Wait for a short duration to ensure the camera is ready
+        await sleep(1500);
+        console.log('Taking photo...');
         
         try {
             const photo = await cameraRef?.takePhoto({
@@ -69,6 +77,7 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
             }
         } catch (error) {
             console.log('Capture Error:', error);
+            setIsProcessing(false);
             // Alert.alert('Error', 'Failed to capture image.');
             return
         }

@@ -15,7 +15,7 @@ const compressBase64Image = async (base64Image: string): Promise<string> => {
         800,       // Max width
         800,       // Max height
         'JPEG',    // Image format
-        80,        // Quality (0-100)
+        90,        // Quality (0-100)
       );
   
       // Read resized image back to Base64

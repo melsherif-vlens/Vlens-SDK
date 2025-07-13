@@ -15,9 +15,9 @@ type VLensViewProps = SdkConfig
 
 const VLensView = (props: VLensViewProps) => {
 
-    const [step, setStep] = useState<'startNationalId' | 'nationalId' | 'startFace' | 'face'>('startNationalId');
+    const [step, setStep] = useState<'startNationalId' | 'nationalId' | 'startFace' | 'face' | ''>('');
     // const numberOfLivenessRetries = useRef(0);
-  
+
     // Check props
     useEffect(() => {
         console.log('VLensView Props:', props);
@@ -33,7 +33,10 @@ const VLensView = (props: VLensViewProps) => {
 
         if (props.isLivenessOnly) {
             setStep('startFace');
+            return;
         }
+
+        setStep('startNationalId');
     }, []);
 
     // Callbacks
@@ -132,10 +135,16 @@ const VLensView = (props: VLensViewProps) => {
     }
 
     // Face Validation Step
+    if (step === 'face') {
+        return (
+            <View style={styles.container}>
+                <FaceValidationPage onNext={onNext} onPrev={onPrev} />
+            </View>
+        );
+    }
+
     return (
-        <View style={styles.container}>
-            <FaceValidationPage onNext={onNext} onPrev={onPrev} />
-        </View>
+        <View style={styles.container}></View>
     );
 };
 

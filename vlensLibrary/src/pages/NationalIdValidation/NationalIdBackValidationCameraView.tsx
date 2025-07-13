@@ -13,6 +13,10 @@ type NationalIdBackValidationCameraViewProps = {
     callback: (imageInBase64: string) => void;
 };
 
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default function NationalIdBackValidationCameraView({ callback }: NationalIdBackValidationCameraViewProps) {
 
     const [isActive, setIsActive] = useState(true);
@@ -40,7 +44,7 @@ export default function NationalIdBackValidationCameraView({ callback }: Nationa
 
         if (!cameraRef) return;
         if (!isCamiraActive.current && Platform.OS !== 'ios') return;
-        
+
         try {
             const photo = await cameraRef?.takePhoto({
                 enableShutterSound: false,
@@ -67,15 +71,20 @@ export default function NationalIdBackValidationCameraView({ callback }: Nationa
             if (codes.length > 0 && isActive && !hasHandledScan.current) {
                 hasHandledScan.current = true;
                 handleCodeScanned();
-                // Pause scanning after detection
-                isCamiraActive.current = false;
-                setIsActive(false);
+
             }
         },
     });
 
     const handleCodeScanned = async () => {
+        await sleep(1500);
         const imageInBase64 = await getBase64ImageFromCamera();
+
+        // Pause scanning after detection
+        isCamiraActive.current = false;
+        setIsActive(false);
+
+        
         if (!imageInBase64) {
             console.warn('No image captured from camera.');
             return;
