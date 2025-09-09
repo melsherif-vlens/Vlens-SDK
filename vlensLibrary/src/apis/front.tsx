@@ -4,12 +4,19 @@ import { handleApiError } from './ApiError';
 import type { VerifyIdFrontApiResponse } from './payload/VerifyIdFrontApi';
 
 const verifyIdFrontApi = async (transactionId: string, imageBase64: string) => {
-  const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/front';
+
+  var url = ""
+
+  if (!sdkConfig.env.accessToken) {
+    url = sdkConfig.env.apiBaseUrl + '/v1/ocr/id/front';
+  } else {
+    url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/front';
+  }
 
   const requestBody = {
     transaction_id: transactionId,
     image: imageBase64,
-    getExtractedData: true, 
+    getExtractedData: true,
   };
 
   try {
@@ -26,7 +33,7 @@ const verifyIdFrontApi = async (transactionId: string, imageBase64: string) => {
 
     return { isVerificationProcessCompleted, isDigitalIdentityVerified };
   } catch (error) {
-      throw handleApiError(error);
+    throw handleApiError(error);
   }
 };
 

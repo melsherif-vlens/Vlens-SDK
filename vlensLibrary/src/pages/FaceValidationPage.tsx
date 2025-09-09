@@ -183,10 +183,19 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
         try {
             const data = await verifyFaceApi(transactionId, face1, face2, face3);
 
-            if (data.isVerificationProcessCompleted && data.isDigitalIdentityVerified) {
-                onNext();
+            if (sdkConfig?.env?.accessToken) {
+                if (data.isVerificationProcessCompleted && data.isDigitalIdentityVerified) {
+                    onNext();
+                } else {
+                    onNext('0', t('div_failed'));
+                }
+                
             } else {
-                onNext('0', t('div_failed'));
+                if (data.isMatched) {
+                    onNext();
+                } else {
+                    onNext('0', t('div_failed'));
+                }
             }
 
 

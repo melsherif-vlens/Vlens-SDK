@@ -2,7 +2,7 @@ import type { Data } from "../apis/payload/VerifyIdBackApi";
 
 export interface EnvironmentConfig{
     apiBaseUrl: string;
-    accessToken: string;
+    accessToken: string | null;
     refreshToken: string;
     apiKey: string;
     tenancyName: string;

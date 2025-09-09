@@ -3,9 +3,16 @@ import { sdkConfig } from '../appConfig';
 import { checkIfThereIsError } from './ApiError';
 
 const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
-    const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/back';
 
-    console.log('url:', { url});
+    var url = ""
+
+    if (!sdkConfig.env.accessToken) { 
+        url = sdkConfig.env.apiBaseUrl + '/v1/ocr/id/back';
+    } else {
+        url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/back';
+    }
+
+    console.log('url:', { url });
 
     const requestBody = {
         transaction_id: transactionId,

@@ -89,14 +89,16 @@ export default function App() {
         transactionId={transactionId}
         isLivenessOnly={isLivenessOnly.current}
         isNationalIdOnly={false}
+        numberOfRetries={3}
         env={{
           apiBaseUrl: 'https://api.vlenseg.com',
           accessToken: accessToken,
+          // accessToken: null,
           refreshToken: '',
           apiKey: _apiKey,
           tenancyName: _telencyName,
         }}
-        defaultLocale={'ar'}
+        defaultLocale={'en'}
         colors={{
           accent: '#4E5A78',
           primary: '#397374',

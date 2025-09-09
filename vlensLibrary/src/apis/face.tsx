@@ -3,7 +3,15 @@ import { sdkConfig } from '../appConfig';
 import { checkIfThereIsError } from './ApiError';
 
 const verifyFaceApi = async (transactionId: string, face1: string, face2: string, face3: string) => {
-    const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/liveness/multi';
+    // const url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/liveness/multi';
+
+    var url = ""
+
+    if (!sdkConfig.env.accessToken) { 
+        url = sdkConfig.env.apiBaseUrl + '/v1/ocr/liveness/multi';
+    } else {
+        url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/liveness/multi';
+    }
 
     console.log('URL:', url);
 
@@ -28,12 +36,13 @@ const verifyFaceApi = async (transactionId: string, face1: string, face2: string
         throw { errorCode, errorMessage };
     }
 
-    const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};
+    const { isVerificationProcessCompleted, isDigitalIdentityVerified, isMatched } = response.data?.data || {};
 
     console.log('Verification Completed:', isVerificationProcessCompleted);
     console.log('Digital Identity Verified:', isDigitalIdentityVerified);
+    console.log('isMatched:', isMatched);
 
-    return { isVerificationProcessCompleted, isDigitalIdentityVerified };
+    return { isVerificationProcessCompleted, isDigitalIdentityVerified, isMatched };
 };
 
 export default verifyFaceApi;

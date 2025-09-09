@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import RNFS from 'react-native-fs';
-import { StyleSheet, View, Text, Platform } from 'react-native';
+import { StyleSheet, View, Text, Platform, TouchableOpacity } from 'react-native';
 import compressBase64Image from '../../utilities/compressBase64Image';
 import { useI18n } from '../../localization/useI18n';
 import {
@@ -26,6 +26,8 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
 
     const { t } = useI18n();
 
+    const [timerCount, setTimerCount] = useState(0);
+
     // Request Camera Permission
     // useEffect(() => {
     //     console.log('requestPermission');
@@ -36,6 +38,18 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
     //     requestPermission();
     // }, []);
 
+    //timer counter
+    useEffect(() => {
+        console.log('Starting timer...');
+        let timer: NodeJS.Timeout;
+        if (isCamiraActive.current) {
+            timer = setInterval(() => {
+                console.log('Timer tick:', timerCount);
+                setTimerCount(prevCount => prevCount + 1);
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, []);
 
     const getBase64ImageFromCamera = async () => {
 
@@ -58,6 +72,15 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
         }
 
     }
+
+    // Capture Image
+    const captureImage = async () => {
+        const base64Image = await getBase64ImageFromCamera();
+        if (typeof base64Image === 'string' && base64Image !== '') {
+            var currentFaceValueCompressed = await compressBase64Image(base64Image);
+            callback(currentFaceValueCompressed);
+        }
+    };
 
     // // Code scanner configuration for PDF417
     // const codeScanner = useCodeScanner({
@@ -102,6 +125,11 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
 
     const frameProcessor = useFrameProcessor(async (frame) => {
         'worklet';
+
+        if (timerCount < 3 || timerCount > 7) {
+            return;
+        }
+
         // console.log('Processing frame for text detection...');
         const data = detectText(frame);
         const { text } = data || {};
@@ -121,6 +149,9 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
         );
     }
 
+    //print timerCount
+    console.log('Current timerCount:', timerCount);
+    
     return (
         <View style={styles.container}>
             <Camera
@@ -134,6 +165,15 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
                     console.error('Camera error:', error);
                 }}
             />
+
+            {/* Capture Button */}
+            <View style={styles.footer}>
+                {timerCount > 7 ?
+                    <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
+                        <View style={styles.captureCircle} />
+                    </TouchableOpacity>
+                    : null}
+            </View>
         </View>
     );
 }
@@ -151,4 +191,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
     },
+    footer: {
+        height: 200,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#1a1a1a',
+    },
+    captureButton: {
+        position: 'absolute',
+        bottom: 90,
+        alignSelf: 'center',
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#fff', // Outer white circle
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5, // Shadow for Android
+    },
+    captureCircle: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        borderColor: '#1a1a1a',
+        borderWidth: 4,
+        backgroundColor: '#fff',
+    }
 });

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import RNFS from 'react-native-fs';
-import { StyleSheet, View, Text, Platform } from 'react-native';
+import { StyleSheet, View, Text, Platform, TouchableOpacity } from 'react-native';
 import { Camera, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera';
 import { useFaceDetector } from 'react-native-vision-camera-face-detector'
 import type { Face, FaceDetectionOptions } from 'react-native-vision-camera-face-detector'
@@ -35,7 +35,20 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
     const [cameraPermission, setCameraPermission] = useState(false);
     const [cameraRef, setCameraRef] = useState<Camera | null>(null);
 
+    const [timerCount, setTimerCount] = useState(0);
+
     const { t } = useI18n();
+
+    //timer counter
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (isCameraActive.current) {
+            timer = setInterval(() => {
+                setTimerCount(prevCount => prevCount + 1);
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, []);
 
     // Request Camera Permission
     useEffect(() => {
@@ -84,11 +97,19 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
 
     }
 
+    // Capture Image
+    const captureImage = async () => {
+        const base64Image = await getBase64ImageFromCamera();
+        if (typeof base64Image === 'string' && base64Image !== '') {
+            var currentFaceValueCompressed = await compressBase64Image(base64Image);
+            callback(currentFaceValueCompressed);
+        }
+    };
+
     // Face Detection
     const handleFacesDetection = Worklets.createRunOnJS(async (
         faces: Face[]
     ) => {
-
         if (Array.isArray(faces) && faces.length !== 0) {
             try {
                 const currentFaceValue = await getBase64ImageFromCamera();
@@ -118,7 +139,13 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
 
     const frameProcessor = useFrameProcessor((frame) => {
         'worklet'
+
+        if (timerCount < 3 || timerCount > 7) {
+            return;
+        }
+
         console.log('Processing frame for face detection...');
+
         const result = detectFaces(frame)
         handleFacesDetection(result)
     }, [handleFacesDetection])
@@ -156,6 +183,15 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
                 photoQualityBalance='quality'
                 frameProcessor={frameProcessor}
             />
+
+            {/* Capture Button */}
+            <View style={styles.footer}>
+                {timerCount > 7 ?
+                    <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
+                        <View style={styles.captureCircle} />
+                    </TouchableOpacity>
+                    : null}
+            </View>
         </View>
     );
 }
@@ -172,4 +208,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
     },
+    footer: {
+        height: 200,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#1a1a1a',
+    },
+    captureButton: {
+        position: 'absolute',
+        bottom: 90,
+        alignSelf: 'center',
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#fff', // Outer white circle
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5, // Shadow for Android
+    },
+    captureCircle: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        borderColor: '#1a1a1a',
+        borderWidth: 4,
+        backgroundColor: '#fff',
+    }
 });
