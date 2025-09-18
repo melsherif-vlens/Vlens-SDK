@@ -1,40 +1,42 @@
 import API from './api';
 import { sdkConfig } from '../appConfig';
-import { handleApiError } from './ApiError';
-import type { VerifyIdFrontApiResponse } from './payload/VerifyIdFrontApi';
+import { checkIfThereIsError } from './ApiError';
 
 const verifyIdFrontApi = async (transactionId: string, imageBase64: string) => {
 
-  var url = ""
+	var url = ""
 
-  if (!sdkConfig.env.accessToken) {
-    url = sdkConfig.env.apiBaseUrl + '/v1/ocr/id/front';
-  } else {
-    url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/front';
-  }
+	if (!sdkConfig.env.accessToken) {
+		url = sdkConfig.env.apiBaseUrl + '/v1/ocr/id/front';
+	} else {
+		url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/front';
+	}
 
-  const requestBody = {
-    transaction_id: transactionId,
-    image: imageBase64,
-    getExtractedData: true,
-  };
+	console.log('url:', { url });
 
-  try {
-    const response = await API.post(url, requestBody);
+	const requestBody = {
+		transaction_id: transactionId,
+		image: imageBase64,
+		getExtractedData: true,
+	};
 
-    const responseData = response.data as VerifyIdFrontApiResponse;
-    console.log('Front Response:', responseData);
+	console.log('Request Body:', requestBody);
 
-    const isVerificationProcessCompleted = responseData?.data?.isVerificationProcessCompleted;
-    const isDigitalIdentityVerified = responseData?.data?.isDigitalIdentityVerified;
+	const response = await API.post(url, requestBody);
+	console.log('Response:', response.data);
 
-    console.log('Verification Completed:', isVerificationProcessCompleted);
-    console.log('Digital Identity Verified:', isDigitalIdentityVerified);
+	const { errorCode, errorMessage } = checkIfThereIsError(response);
+	if (errorCode != -1) {
+		console.error('API Error:', errorCode, errorMessage);
+		throw { errorCode, errorMessage };
+	}
 
-    return { isVerificationProcessCompleted, isDigitalIdentityVerified };
-  } catch (error) {
-    throw handleApiError(error);
-  }
+	const { isVerificationProcessCompleted, isDigitalIdentityVerified } = response.data?.data || {};
+
+	console.log('Verification Completed:', isVerificationProcessCompleted);
+	console.log('Digital Identity Verified:', isDigitalIdentityVerified);
+
+	return response.data?.data;
 };
 
 export default verifyIdFrontApi;

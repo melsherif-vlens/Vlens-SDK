@@ -90,6 +90,7 @@ export default function App() {
         isLivenessOnly={isLivenessOnly.current}
         isNationalIdOnly={false}
         numberOfRetries={3}
+        allowAutoCapture={true}
         env={{
           apiBaseUrl: 'https://api.vlenseg.com',
           accessToken: accessToken,

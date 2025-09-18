@@ -7,6 +7,7 @@ import type { Face, FaceDetectionOptions } from 'react-native-vision-camera-face
 import { Worklets } from 'react-native-worklets-core'
 import compressBase64Image from '../../utilities/compressBase64Image';
 import { useI18n } from '../../localization/useI18n';
+import { sdkConfig } from '../../appConfig';
 
 type NationalIdFrontValidationCameraViewProps = {
     callback: (imageInBase64: string) => void;
@@ -74,7 +75,7 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
         // Wait for a short duration to ensure the camera is ready
         await sleep(1500);
         console.log('Taking photo...');
-        
+
         try {
             const photo = await cameraRef?.takePhoto({
                 enableShutterSound: false,
@@ -140,6 +141,10 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
     const frameProcessor = useFrameProcessor((frame) => {
         'worklet'
 
+        if (sdkConfig.allowAutoCapture === false) {
+            return;
+        }
+
         if (timerCount < 3 || timerCount > 7) {
             return;
         }
@@ -152,6 +157,15 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
 
 
     // Views
+
+    const captureButtonView = () => {
+        return (
+            <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
+                <View style={styles.captureCircle} />
+            </TouchableOpacity>
+        );
+    }
+
     {/*  Camera Permission Denied View */ }
     if (!cameraPermission) {
         return (
@@ -170,7 +184,7 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
         );
     }
 
-    console.log('Starting Camera to detect front side of National ID');
+    console.log('Starting Camera to detect front side of National ID with all');
 
     return (
         <View style={styles.container}>
@@ -186,15 +200,19 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
 
             {/* Capture Button */}
             <View style={styles.footer}>
-                {timerCount > 7 ?
-                    <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
-                        <View style={styles.captureCircle} />
-                    </TouchableOpacity>
-                    : null}
+                {
+                    (sdkConfig.allowAutoCapture === false) ?
+                        captureButtonView() : (
+                            (timerCount > 7) ?
+                                captureButtonView()
+                                : null
+                        )}
             </View>
         </View>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {

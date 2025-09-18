@@ -6,7 +6,7 @@ const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
 
     var url = ""
 
-    if (!sdkConfig.env.accessToken) { 
+    if (!sdkConfig.env.accessToken) {
         url = sdkConfig.env.apiBaseUrl + '/v1/ocr/id/back';
     } else {
         url = sdkConfig.env.apiBaseUrl + '/api/DigitalIdentity/verify/id/back';
@@ -17,15 +17,15 @@ const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
     const requestBody = {
         transaction_id: transactionId,
         image: imageBase64,
-        getExtractedData: true 
+        getExtractedData: true,
     };
 
     console.log('Request Body:', requestBody);
 
     const response = await API.post(url, requestBody);
     console.log('Response:', response.data);
-    
-    const {errorCode, errorMessage} = checkIfThereIsError(response);
+
+    const { errorCode, errorMessage } = checkIfThereIsError(response);
     if (errorCode != -1) {
         console.error('API Error:', errorCode, errorMessage);
         throw { errorCode, errorMessage };
@@ -37,7 +37,6 @@ const verifyIdBackApi = async (transactionId: string, imageBase64: string) => {
     console.log('Digital Identity Verified:', isDigitalIdentityVerified);
 
     return response.data?.data;
-
 };
 
 export default verifyIdBackApi;

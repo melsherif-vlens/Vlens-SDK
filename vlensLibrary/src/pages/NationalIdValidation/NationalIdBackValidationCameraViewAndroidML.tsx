@@ -11,6 +11,7 @@ import {
 
 import { detectText } from 'react-native-vision-camera-text-detector';
 import { Worklets } from 'react-native-worklets-core'
+import { sdkConfig } from '../../appConfig';
 
 type NationalIdBackValidationCameraViewAndroidProps = {
     callback: (imageInBase64: string) => void;
@@ -126,6 +127,10 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
     const frameProcessor = useFrameProcessor(async (frame) => {
         'worklet';
 
+        if (sdkConfig.allowAutoCapture === false) {
+            return;
+        }
+
         if (timerCount < 3 || timerCount > 7) {
             return;
         }
@@ -151,7 +156,15 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
 
     //print timerCount
     console.log('Current timerCount:', timerCount);
-    
+
+    const captureButtonView = () => {
+        return (
+            <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
+                <View style={styles.captureCircle} />
+            </TouchableOpacity>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <Camera
@@ -168,11 +181,13 @@ export default function NationalIdBackValidationCameraViewAndroid({ callback }: 
 
             {/* Capture Button */}
             <View style={styles.footer}>
-                {timerCount > 7 ?
-                    <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
-                        <View style={styles.captureCircle} />
-                    </TouchableOpacity>
-                    : null}
+                {
+                    (sdkConfig.allowAutoCapture === false) ?
+                        captureButtonView() : (
+                            (timerCount > 7) ?
+                                captureButtonView()
+                                : null
+                        )}
             </View>
         </View>
     );

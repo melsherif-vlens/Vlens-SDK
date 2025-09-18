@@ -8,6 +8,7 @@ import {
     useCameraDevice,
     useCodeScanner,
 } from 'react-native-vision-camera';
+import { sdkConfig } from '../../appConfig';
 
 type NationalIdBackValidationCameraViewProps = {
     callback: (imageInBase64: string) => void;
@@ -89,6 +90,10 @@ export default function NationalIdBackValidationCameraView({ callback }: Nationa
         codeTypes: ['pdf-417'],
         onCodeScanned: (codes) => {
 
+            if (sdkConfig.allowAutoCapture === false) {
+                return;
+            }
+
             if (timerCount < 3 || timerCount > 7) {
                 return;
             }
@@ -143,6 +148,14 @@ export default function NationalIdBackValidationCameraView({ callback }: Nationa
         );
     }
 
+    const captureButtonView = () => {
+        return (
+            <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
+                <View style={styles.captureCircle} />
+            </TouchableOpacity>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <Camera
@@ -159,11 +172,13 @@ export default function NationalIdBackValidationCameraView({ callback }: Nationa
 
             {/* Capture Button */}
             <View style={styles.footer}>
-                {timerCount > 7 ?
-                    <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
-                        <View style={styles.captureCircle} />
-                    </TouchableOpacity>
-                    : null}
+                {
+                    (sdkConfig.allowAutoCapture === false) ?
+                        captureButtonView() : (
+                            (timerCount > 7) ?
+                                captureButtonView()
+                                : null
+                        )}
             </View>
         </View>
     );

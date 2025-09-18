@@ -34,6 +34,7 @@ export type SdkConfig = {
     isLivenessOnly: boolean;
     isNationalIdOnly: boolean;
     numberOfRetries: number;
+    allowAutoCapture?: boolean;
     env: EnvironmentConfig;
     defaultLocale: string;
     colors: ColorConfig;

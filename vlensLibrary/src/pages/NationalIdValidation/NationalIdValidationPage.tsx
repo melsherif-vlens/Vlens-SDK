@@ -94,6 +94,7 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
 
             setErrorCode(errorCode);
             setErrorMsg(errorMessage);
+            
         } finally {
             setDidPostFrontImage(true);
         }
@@ -110,30 +111,32 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
             var data = await verifyIdBackApi(transactionId, base64Compressed);
             sdkConfig.userData = data;
         } catch (error) {
-            var errorMessage = '';
-            var errorCode = -1;
+            var _errorMessage = '';
+            var _errorCode = -1;
 
             if (typeof error === 'object' && error !== null) {
                 const { errorCode: code, errorMessage: message } = error as any;
                 if (code !== undefined && message !== undefined) {
-                    errorCode = code;
-                    errorMessage = message;
-                    console.log('API Response Error:', errorCode, errorMessage);
+                    _errorCode = code;
+                    _errorMessage = message;
+                    console.log('API Response Error:', _errorCode, _errorMessage);
                 } else {
                     console.log('Unexpected Error:', error);
-                    errorMessage = 'Internet connection error.';
+                    _errorMessage = 'Internet connection error.';
                 }
             } else {
                 console.log('Unexpected Error:', error);
-                errorMessage = 'Internet connection error.';
+                _errorMessage = 'Internet connection error.';
             }
 
-            if (errorMessage == '') {
-                errorMessage = t('id_error_msg');
+            if (_errorMessage == '') {
+                _errorMessage = t('id_error_msg');
             }
 
-            setErrorCode(errorCode);
-            setErrorMsg(errorMessage);
+            if (errorMsg == '' && errorCode == -1) { // Means there was no error before in front image
+                setErrorCode(_errorCode);
+                setErrorMsg(_errorMessage);
+            }
         } finally {
             setDidPostBackImage(true);
         }

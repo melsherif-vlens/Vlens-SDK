@@ -11,7 +11,7 @@ export default function CameraOverlayView({ step }: Props) {
     const { t } = useI18n();
     if (step === 'flip') {
         return (
-            <View style={styles.overlay}>
+            <View pointerEvents='none' style={styles.overlay}>
                 <Image
                     source={require('../../assets/id_flip.gif')}
                     style={styles.cardOutlineImage}
@@ -21,9 +21,11 @@ export default function CameraOverlayView({ step }: Props) {
                 </Text>
             </View>
         );
-    } else if (step === 'back') {
+    }
+    
+    if (step === 'back') {
         return (
-            <View style={styles.overlay}>
+            <View pointerEvents='none' style={styles.overlay}>
                 <Image
                     source={require('../../assets/scanning_natioanl_id_back_vector.png')}
                     style={styles.cardOutlineImage}
@@ -36,7 +38,7 @@ export default function CameraOverlayView({ step }: Props) {
     };
 
     return (
-        <View style={styles.overlay}>
+        <View pointerEvents='none' style={styles.overlay}>
             <Image
                 source={require('../../assets/scanning_natioanl_id_front_vector.png')}
                 style={styles.cardOutlineImage}
