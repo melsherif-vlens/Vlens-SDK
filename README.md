@@ -46,6 +46,8 @@ import VLensView from 'react-native-vlens';
   transactionId={transactionId}
   isLivenessOnly={false}
   isNationalIdOnly={false}
+  numberOfRetries={3}
+  allowAutoCapture={true}
   env={{
     apiBaseUrl: 'https://api.vlenseg.com',
     accessToken: accessToken,
@@ -110,12 +112,22 @@ import VLensView from 'react-native-vlens';
    - Default: `false`
    - Description: If `true`, only national ID scanning will be performed.
 
-2. **defaultLocale**
+2. **numberOfRetries**
+   - Type: `int`
+   - Default: `3`
+   - Description: Number of retry attempts in case a failure occurs.
+
+3. **allowAutoCapture**
+   - Type: `boolean`
+   - Default: `true`
+   - Description: If `false`, disable auto capture for natioanl id.
+
+4. **defaultLocale**
    - Type: `string`
    - Default: `'en'`
    - Description: Sets the default language for the component (e.g., `'en'` for English).
 
-3. **colors**
+5. **colors**
    - Type: `object`
    - Description: Customize the color palette for the component's UI.
    - Fields:
@@ -126,7 +138,7 @@ import VLensView from 'react-native-vlens';
      - **dark**: Dark theme color.
      - **light**: Light theme color.
 
-4. **errorMessages**
+6. **errorMessages**
    - Type: `array`
    - Default: `[]`
    - Description: Custom error messages for specific scenarios. (Coming soon)
@@ -145,6 +157,7 @@ import VLensView from 'react-native-vlens';
 - Ensure all required props are properly configured to avoid unexpected behavior.
 - Customize the `colors` prop to match the application's theme.
 - The `errorMessages` feature is planned for future updates and is currently a placeholder.
+- Ensure you are using the latest versions of the additional installation/dependencies.
 
 ## Styling
 The `colors` prop allows you to control the UI theme. For example:

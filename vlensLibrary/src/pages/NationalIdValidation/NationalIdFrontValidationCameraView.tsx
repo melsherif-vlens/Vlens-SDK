@@ -160,9 +160,14 @@ export default function NationalIdFrontValidationCameraView({ callback }: Nation
 
     const captureButtonView = () => {
         return (
-            <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
-                <View style={styles.captureCircle} />
-            </TouchableOpacity>
+            isProcessing ?
+                <View style={styles.loadingCaptureButton}>
+                    <Text style={{ color: '#FFFFFF', fontSize: 14 }}>Loading...</Text>
+                </View>
+                :
+                <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
+                    <View style={styles.captureCircle} />
+                </TouchableOpacity>
         );
     }
 
@@ -244,6 +249,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5, // Shadow for Android
+    },
+    loadingCaptureButton: {
+        position: 'absolute',
+        bottom: 90,
+        alignSelf: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     captureCircle: {
         width: 70,

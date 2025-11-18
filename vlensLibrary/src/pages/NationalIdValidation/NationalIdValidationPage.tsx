@@ -69,6 +69,7 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
             const base64Compressed = await compressBase64Image(base64);
             const transactionId = sdkConfig?.transactionId;
             await verifyIdFrontApi(transactionId, base64Compressed);
+
         } catch (error) {
             var errorMessage = '';
             var errorCode = -1;
@@ -202,13 +203,14 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
     };
 
     const handleRetryScanning = () => {
-        console.log('Retry Scanning');
         setNumberOfRetries(numberOfRetries + 1);
         setErrorMsg('');
         setErrorCode(-1);
         setStep('front');
         setDidPostFrontImage(false);
         setDidPostBackImage(false);
+        
+        console.log('Retry Scanning with errorCode:', errorCode, 'errorMsg:', errorMsg, 'numberOfRetries:', numberOfRetries);
     };
 
     const handleExist = () => {
@@ -276,13 +278,13 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
 
                 {step === 'front' ? (
                     <NationalIdFrontValidationCameraView callback={didGetImage} />
-                ) : (
+                ) : step === 'back' ? (
                     Platform.OS === 'android' ? (
                         <NationalIdBackValidationCameraViewAndroid callback={didGetImage} />
                     ) : (
                         <NationalIdBackValidationCameraView callback={didGetImage} />
                     )
-                )}
+                ) : null}
 
                 {/* Card Overlay */}
                 <CameraOverlayView step={step} />
