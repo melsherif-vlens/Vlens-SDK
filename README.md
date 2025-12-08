@@ -46,7 +46,7 @@ import VLensView from 'react-native-vlens';
   transactionId={transactionId}
   isLivenessOnly={false}
   isNationalIdOnly={false}
-  numberOfRetries={3}
+  numberOfRetries={5}
   allowAutoCapture={true}
   env={{
     apiBaseUrl: 'https://api.vlenseg.com',
@@ -114,7 +114,7 @@ import VLensView from 'react-native-vlens';
 
 2. **numberOfRetries**
    - Type: `int`
-   - Default: `3`
+   - Default: `5`
    - Description: Number of retry attempts in case a failure occurs.
 
 3. **allowAutoCapture**
