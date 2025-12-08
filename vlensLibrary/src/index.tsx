@@ -29,7 +29,7 @@ const VLensView = (props: VLensViewProps) => {
         sdkConfig.defaultLocale = props.defaultLocale;
         sdkConfig.allowAutoCapture = props.allowAutoCapture !== false;
         sdkConfig.colors = props.colors;
-        sdkConfig.numberOfRetries = Math.min(props.numberOfRetries || 3, 3);
+        sdkConfig.numberOfRetries = (props.numberOfRetries == null || props.numberOfRetries <= 0) ? 5 : props.numberOfRetries;
 
         console.log('VLensView Config:', sdkConfig);
 

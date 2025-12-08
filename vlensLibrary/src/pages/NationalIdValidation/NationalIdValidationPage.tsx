@@ -42,7 +42,7 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
     const [didPostFrontImage, setDidPostFrontImage] = useState(false);
     const [didPostBackImage, setDidPostBackImage] = useState(false);
 
-    const [numberOfRetries, setNumberOfRetries] = useState(1);
+    const [numberOfRetries, setNumberOfRetries] = useState(0);
 
     useEffect(() => {
         if (didPostFrontImage && didPostBackImage) {
@@ -248,7 +248,7 @@ export default function NationalIdValidationPage({ onNext, onPrev }: NationalIdV
         return (
             <NationalIdValidationErrorView
                 errorMsg={errorMsg}
-                isAllowedToRetry={numberOfRetries < sdkConfig.numberOfRetries}
+                isAllowedToRetry={numberOfRetries <= (sdkConfig.numberOfRetries ?? 5)}
                 handleRetryScanning={handleRetryScanning}
                 handleExist={handleExist}
             />

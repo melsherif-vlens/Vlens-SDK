@@ -33,7 +33,7 @@ export type SdkConfig = {
     transactionId: string;
     isLivenessOnly: boolean;
     isNationalIdOnly: boolean;
-    numberOfRetries: number;
+    numberOfRetries?: number;
     allowAutoCapture?: boolean;
     env: EnvironmentConfig;
     defaultLocale: string;

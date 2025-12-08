@@ -5,7 +5,7 @@ export const sdkConfig: SdkConfig = {
     transactionId: '',
     isLivenessOnly: false,
     isNationalIdOnly: false,
-    numberOfRetries: 3,
+    numberOfRetries: 5,
     allowAutoCapture: true,
     env: {
         apiBaseUrl: 'https://api.vlenseg.com',

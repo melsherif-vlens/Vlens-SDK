@@ -54,7 +54,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
     const [isLoadingImage, setIsLoadingImage] = useState(false);
     var isProcessing = false;
 
-    const [numberOfRetries, setNumberOfRetries] = useState(1);
+    const [numberOfRetries, setNumberOfRetries] = useState(0);
 
     const { t } = useI18n();
 
@@ -547,7 +547,7 @@ export default function FaceValidationPage({ onNext, onPrev }: FaceValidationPag
                 <Text style={styles.instructions}>{errorMsg !== '' ? errorMsg : t('id_error_msg')}</Text>
 
                 {/* Scan ID Button */}
-                {numberOfRetries < sdkConfig.numberOfRetries && (
+                {numberOfRetries <= (sdkConfig.numberOfRetries ?? 5) && (
                     <View style={styles.scanButtonContainer}>
                         <TouchableOpacity style={styles.scanButton} onPress={handleRetryScanning}>
                             <Text style={styles.scanButtonText}>{t('retry_scanning')}</Text>

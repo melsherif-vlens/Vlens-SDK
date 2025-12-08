@@ -89,7 +89,6 @@ export default function App() {
         transactionId={transactionId}
         isLivenessOnly={isLivenessOnly.current}
         isNationalIdOnly={false}
-        numberOfRetries={3}
         allowAutoCapture={true}
         env={{
           apiBaseUrl: 'https://api.vlenseg.com',
