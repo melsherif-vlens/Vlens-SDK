@@ -13,6 +13,7 @@ API.interceptors.request.use(
         config.headers['Authorization'] = `Bearer ${sdkConfig.env.accessToken}`;
         config.headers['ApiKey'] = sdkConfig.env.apiKey;
         config.headers['TenancyName'] = sdkConfig.env.tenancyName;
+        config.headers['Accept-Language'] = sdkConfig.defaultLocale || 'en';
 
         return config;
     },

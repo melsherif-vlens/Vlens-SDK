@@ -99,7 +99,7 @@ export default function App() {
           apiKey: _apiKey,
           tenancyName: _telencyName,
         }}
-        defaultLocale={'en'}
+        defaultLocale={'ar'}
         colors={{
           accent: '#4E5A78',
           primary: '#397374',
